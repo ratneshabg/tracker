@@ -552,10 +552,6 @@
             <p class="text-2xl font-bold text-gray-600" id="exp-owners">0</p>
             <p class="text-gray-500 mt-1 text-xs">Unique Owners</p>
           </div>
-          <div class="bg-gray-50 rounded-xl p-4 flex items-center justify-center">
-            <button onclick="if(confirm('This will load defaults over current unsynced data. Continue?')){ items=defaultItems(); saveData(); showToast('Data reset ✓'); }"
-              class="text-red-500 text-xs hover:underline">⚠ Reset to Defaults</button>
-          </div>
         </div>
       </div>
     </div>
@@ -638,7 +634,7 @@
             Where is my data stored?
             <span class="arrow text-blue-500 text-lg leading-none">+</span>
           </summary>
-          <p class="text-sm text-gray-500 mt-3 leading-relaxed">All data lives remotely on your designated GitHub repository via the API! Changes are saved automatically and sync across multiple devices every 30 seconds.</p>
+          <p class="text-sm text-gray-500 mt-3 leading-relaxed">All data lives remotely on your designated Excel/Google Sheet via the SheetDB API! Changes are saved automatically as you add, edit, or delete items.</p>
         </details>
       </div>
     </div>
@@ -696,23 +692,6 @@
 <div id="toast"></div>
 
 <script>
-// ── Default seed data ─────────────────────────────────────────────
-function defaultItems() {
-  return [
-    { meetingDate:'2026-05-20', title:'Create MOM and share with team',     owner:'John Doe',     priority:'High',   status:'Completed',   dueDate:'2026-05-21', progress:100, notes:'MOM shared via email' },
-    { meetingDate:'2026-05-20', title:'API integration with payment gate',   owner:'Mike Johnson', priority:'High',   status:'In Progress', dueDate:'2026-05-29', progress:40,  notes:'Backend pending' },
-    { meetingDate:'2026-05-15', title:'Design homepage mockup v2',           owner:'Sara Lee',     priority:'High',   status:'Completed',   dueDate:'2026-05-18', progress:100, notes:'Figma link shared' },
-    { meetingDate:'2026-05-15', title:'QA smoke test – sprint 12',           owner:'Ravi Kumar',   priority:'Medium', status:'Completed',   dueDate:'2026-05-17', progress:100, notes:'All P0 cases passed' },
-    { meetingDate:'2026-05-10', title:'Update SLA documentation for Q2',     owner:'Amy Chen',     priority:'Medium', status:'Not Started', dueDate:'2026-05-30', progress:0,   notes:'Draft started' },
-    { meetingDate:'2026-05-10', title:'Migrate DB to new cluster',           owner:'Mike Johnson', priority:'High',   status:'In Progress', dueDate:'2026-05-25', progress:60,  notes:'Staging done, prod next' },
-    { meetingDate:'2026-05-08', title:'Write onboarding runbook',            owner:'John Doe',     priority:'Low',    status:'Not Started', dueDate:'2026-06-05', progress:0,   notes:'Outline drafted' },
-    { meetingDate:'2026-05-05', title:'Vendor invoice reconciliation',       owner:'Amy Chen',     priority:'High',   status:'In Progress', dueDate:'2026-05-12', progress:30,  notes:'Waiting on finance' },
-    { meetingDate:'2026-05-05', title:'Set up CI/CD for mobile app',         owner:'Ravi Kumar',   priority:'High',   status:'In Progress', dueDate:'2026-05-28', progress:70,  notes:'GitHub Actions configured' },
-    { meetingDate:'2026-04-28', title:'Annual leave policy review',          owner:'Sara Lee',     priority:'Low',    status:'Completed',   dueDate:'2026-05-02', progress:100, notes:'HR approved' },
-    { meetingDate:'2026-04-28', title:'Hotfix – auth token expiry bug',      owner:'Mike Johnson', priority:'High',   status:'Completed',   dueDate:'2026-04-29', progress:100, notes:'Released v2.1.4' }
-  ];
-}
-
 // ── State ─────────────────────────────────────────────────────────
 let items = [];
 let settings = {};
@@ -730,125 +709,38 @@ function renderCurrentTab() {
   renderAll();
 }
 
-// ── GITHUB API CONFIGURATION ──────────────────────────────────────
-const GITHUB_CONFIG = {
-  owner: 'YOUR_GITHUB_USERNAME',        // Replace with your GitHub username
-  repo: 'YOUR_REPO_NAME',               // Replace with your repository name
-  path: 'data/tasks.json',              // Path to data file in repo
-  branch: 'main',                       // Branch name
-  token: 'YOUR_PERSONAL_ACCESS_TOKEN'   // GitHub Personal Access Token
-};
-
-let fileSha = null; // Track file SHA for GitHub updates
-
-// ── DATA PERSISTENCE (GITHUB SYNC) ────────────────────────────────
-async function saveData() {
-  try {
-    const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
-    const payload = { items, settings };
-    const content = btoa(JSON.stringify(payload, null, 2));
-
-    const body = {
-      message: `Update dashboard data - ${new Date().toISOString()}`,
-      content: content,
-      branch: GITHUB_CONFIG.branch
-    };
-
-    if (fileSha) body.sha = fileSha;
-
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      fileSha = data.content.sha;
-      console.log('✓ Data synced to GitHub');
-    } else {
-      console.error('GitHub save failed:', response.status);
-      showToast('⚠ Sync failed. Check console.');
-    }
-  } catch (error) {
-    console.error('Save error:', error);
-    showToast('⚠ Could not sync to GitHub');
-  }
-}
+// ── SHEETDB CONFIGURATION ─────────────────────────────────────────
+const SHEETDB_URL = 'https://sheetdb.io/api/v1/y98sav0esojjr'; // <--- REPLACE WITH YOUR SHEETDB API ID
 
 async function loadData() {
   try {
-    const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}?ref=${GITHUB_CONFIG.branch}`;
-
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `token ${GITHUB_CONFIG.token}`,
-        'Accept': 'application/vnd.github.v3+json'
-      }
-    });
-
+    const response = await fetch(SHEETDB_URL);
     if (response.ok) {
-      const data = await response.json();
-      fileSha = data.sha;
-
-      const content = atob(data.content);
-      const payload = JSON.parse(content);
-
-      items = payload.items || [];
-      settings = payload.settings || {};
-
-      console.log('✓ Data loaded from GitHub');
-    } else if (response.status === 404) {
-      // File doesn't exist yet
-      items = defaultItems();
-      settings = {
-        defaultPriority: 'Medium', defaultStatus: 'Not Started',
-        rowsPerPage: 25, dashName: 'Meeting Actions'
-      };
-      await saveData(); // Create initial file
-      console.log('✓ Initialized new GitHub data file');
-    } else {
-      throw new Error(`GitHub API error: ${response.status}`);
+      items = await response.json();
+      // Ensure progress is treated as a number
+      items.forEach(i => i.progress = parseInt(i.progress) || 0);
+      console.log('✓ Data loaded from SheetDB');
     }
   } catch (error) {
-    console.error('Load error:', error);
-    if (!items.length) items = defaultItems();
-    settings = settings || {};
-    showToast('⚠ Using offline mode');
+    console.error('SheetDB load error:', error);
+    if (!items.length) items = [];
+    showToast('⚠ Could not load from SheetDB');
   }
 }
 
+// Store settings locally since the spreadsheet is for tabular action items
 function loadSettings() {
-  settings = settings || {};
-}
-
-function saveSettings() {
-  saveData(); // Save everything together
+  settings = JSON.parse(localStorage.getItem('dashSettings')) || {
+    defaultPriority: 'Medium', defaultStatus: 'Not Started',
+    dashName: 'Meeting Actions'
+  };
 }
 
 function saveSetting(key, val) {
   settings[key] = val;
-  saveData();
+  localStorage.setItem('dashSettings', JSON.stringify(settings));
   showToast('Setting saved ✓');
 }
-
-// Auto-sync every 30 seconds to catch updates from other devices
-setInterval(async () => {
-  const currentData = JSON.stringify(items);
-  await loadData();
-  const newData = JSON.stringify(items);
-
-  if (currentData !== newData) {
-    console.log('↻ Data updated from another device');
-    renderCurrentTab();
-    updateSidebarMeta();
-    showToast('📥 Synced from another device');
-  }
-}, 30000);
 
 // ── STATUS CONSTANTS ──────────────────────────────────────────────
 const VALID_STATUSES = {
@@ -965,15 +857,108 @@ function destroyChart(id) {
   if (charts[id]) { charts[id].destroy(); delete charts[id]; }
 }
 
-// Quick update functions for inline editing
-function quickUpdateStatus(idx, newStatus) {
-  if (!VALID_STATUSES[Object.keys(VALID_STATUSES).find(k => VALID_STATUSES[k] === newStatus)]) {
-    console.warn('Invalid status:', newStatus);
+// ── SHEETDB CRUD OPERATIONS ───────────────────────────────────────
+function submitFormItem() {
+  const title = document.getElementById('f-title').value.trim();
+  const owner = document.getElementById('f-owner').value.trim();
+  const mDate = document.getElementById('f-meetingDate').value;
+  if (!title || !owner || !mDate) {
+    showToast('⚠ Please fill Meeting Date, Action Item and Owner');
     return;
   }
+
+  const newItem = {
+    id          : "ID_" + Date.now(), // Create a unique ID for SheetDB
+    meetingDate : mDate,
+    title       : title,
+    owner       : owner,
+    priority    : document.getElementById('f-priority').value,
+    status      : document.getElementById('f-status').value,
+    dueDate     : document.getElementById('f-dueDate').value,
+    progress    : parseInt(document.getElementById('f-progress').value) || 0,
+    notes       : document.getElementById('f-notes').value,
+  };
+
+  syncProgressStatus(newItem);
+  items.push(newItem);
+
+  // Send to SheetDB (Create Row)
+  fetch(SHEETDB_URL, {
+    method: 'POST',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: [newItem] })
+  });
+
+  clearForm();
+  renderAllItems();
+  updateSidebarMeta();
+  renderDashboard();
+  showToast('Item added ✓');
+  switchTab('all-items');
+}
+
+function saveEditItem() {
+  if (_editIndex === null) return;
+  items[_editIndex].meetingDate = document.getElementById('em-meetingDate').value;
+  items[_editIndex].title       = document.getElementById('em-title').value;
+  items[_editIndex].owner       = document.getElementById('em-owner').value;
+  items[_editIndex].priority    = document.getElementById('em-priority').value;
+  items[_editIndex].status      = document.getElementById('em-status').value;
+  items[_editIndex].dueDate     = document.getElementById('em-dueDate').value;
+  items[_editIndex].progress    = parseInt(document.getElementById('em-progress').value) || 0;
+  items[_editIndex].notes       = document.getElementById('em-notes').value;
+
+  syncProgressStatus(items[_editIndex]);
+  const updatedItem = items[_editIndex];
+
+  // Send to SheetDB (Update Row by ID)
+  if (updatedItem.id) {
+    fetch(`${SHEETDB_URL}/id/${updatedItem.id}`, {
+      method: 'PUT',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: updatedItem })
+    });
+  }
+
+  closeEditModal();
+  renderCurrentTab();
+  updateSidebarMeta();
+  showToast('Item updated ✓');
+}
+
+function deleteItem(idx) {
+  if (!confirm('Delete this action item?')) return;
+  
+  const idToDelete = items[idx].id;
+  items.splice(idx, 1); // Remove from local array
+
+  // Send to SheetDB (Delete Row by ID)
+  if (idToDelete) {
+    fetch(`${SHEETDB_URL}/id/${idToDelete}`, {
+      method: 'DELETE',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+    });
+  }
+
+  renderCurrentTab();
+  showToast('Item deleted');
+}
+
+function quickUpdateStatus(idx, newStatus) {
+  if (!VALID_STATUSES[Object.keys(VALID_STATUSES).find(k => VALID_STATUSES[k] === newStatus)]) return;
+  
   items[idx].status = newStatus;
   syncProgressStatus(items[idx]);
-  saveData();
+  
+  // Update in SheetDB
+  if(items[idx].id) {
+    fetch(`${SHEETDB_URL}/id/${items[idx].id}`, {
+      method: 'PATCH',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: { status: items[idx].status, progress: items[idx].progress } })
+    });
+  }
+
   renderCurrentTab();
   updateSidebarMeta();
 }
@@ -982,9 +967,31 @@ function quickUpdateProgress(idx, newProgress) {
   newProgress = Math.max(0, Math.min(100, parseInt(newProgress) || 0));
   items[idx].progress = newProgress;
   syncStatusProgress(items[idx]);
-  saveData();
+  
+  // Update in SheetDB
+  if (items[idx].id) {
+    fetch(`${SHEETDB_URL}/id/${items[idx].id}`, {
+      method: 'PATCH',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: { status: items[idx].status, progress: items[idx].progress } })
+    });
+  }
+
   renderCurrentTab();
   updateSidebarMeta();
+}
+
+function clearForm() {
+  ['f-meetingDate','f-title','f-owner','f-dueDate','f-notes'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById('f-meetingDate').value = todayStr;
+  document.getElementById('f-priority').value   = settings.defaultPriority || 'Medium';
+  document.getElementById('f-status').value     = settings.defaultStatus   || 'Not Started';
+  document.getElementById('f-progress').value   = 0;
+  document.getElementById('f-progressVal').innerText = '0%';
 }
 
 // ── DASHBOARD ─────────────────────────────────────────────────────
@@ -1164,105 +1171,6 @@ function clearFilters() {
   renderAllItems();
 }
 
-// ── EDIT MODAL ────────────────────────────────────────────────────
-function openEditModal(idx) {
-  _editIndex = idx;
-  const item = items[idx];
-  document.getElementById('em-meetingDate').value = item.meetingDate || '';
-  document.getElementById('em-title').value       = item.title       || '';
-  document.getElementById('em-owner').value       = item.owner       || '';
-  document.getElementById('em-priority').value    = item.priority    || 'Medium';
-  document.getElementById('em-status').value      = item.status      || 'Not Started';
-  document.getElementById('em-dueDate').value     = item.dueDate     || '';
-  document.getElementById('em-progress').value    = item.progress    || 0;
-  document.getElementById('em-notes').value       = item.notes       || '';
-  document.getElementById('editModal').classList.remove('hidden');
-  document.getElementById('editModal').classList.add('flex');
-}
-
-function closeEditModal() {
-  document.getElementById('editModal').classList.add('hidden');
-  document.getElementById('editModal').classList.remove('flex');
-  _editIndex = null;
-}
-
-function saveEditItem() {
-  if (_editIndex === null) return;
-  items[_editIndex].meetingDate = document.getElementById('em-meetingDate').value;
-  items[_editIndex].title       = document.getElementById('em-title').value;
-  items[_editIndex].owner       = document.getElementById('em-owner').value;
-  items[_editIndex].priority    = document.getElementById('em-priority').value;
-  items[_editIndex].status      = document.getElementById('em-status').value;
-  items[_editIndex].dueDate     = document.getElementById('em-dueDate').value;
-  items[_editIndex].progress    = parseInt(document.getElementById('em-progress').value) || 0;
-  items[_editIndex].notes       = document.getElementById('em-notes').value;
-
-  syncProgressStatus(items[_editIndex]);
-
-  saveData();
-  closeEditModal();
-  renderCurrentTab();
-  updateSidebarMeta();
-  showToast('Item updated ✓');
-}
-
-// ── ADD ITEM FORM ─────────────────────────────────────────────────
-function submitFormItem() {
-  const title = document.getElementById('f-title').value.trim();
-  const owner = document.getElementById('f-owner').value.trim();
-  const mDate = document.getElementById('f-meetingDate').value;
-  if (!title || !owner || !mDate) {
-    showToast('⚠ Please fill Meeting Date, Action Item and Owner');
-    return;
-  }
-
-  const newItem = {
-    meetingDate : mDate,
-    title       : title,
-    owner       : owner,
-    priority    : document.getElementById('f-priority').value,
-    status      : document.getElementById('f-status').value,
-    dueDate     : document.getElementById('f-dueDate').value,
-    progress    : parseInt(document.getElementById('f-progress').value) || 0,
-    notes       : document.getElementById('f-notes').value,
-  };
-
-  syncProgressStatus(newItem);
-
-  items.push(newItem);
-  saveData();
-  clearForm();
-
-  renderAllItems();
-  updateSidebarMeta();
-  renderDashboard();
-
-  showToast('Item added ✓');
-  switchTab('all-items');
-}
-
-function clearForm() {
-  ['f-meetingDate','f-title','f-owner','f-dueDate','f-notes'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  const todayStr = new Date().toISOString().split('T')[0];
-  document.getElementById('f-meetingDate').value = todayStr;
-  document.getElementById('f-priority').value   = settings.defaultPriority || 'Medium';
-  document.getElementById('f-status').value     = settings.defaultStatus   || 'Not Started';
-  document.getElementById('f-progress').value   = 0;
-  document.getElementById('f-progressVal').innerText = '0%';
-}
-
-// ── DELETE ────────────────────────────────────────────────────────
-function deleteItem(idx) {
-  if (!confirm('Delete this action item?')) return;
-  items.splice(idx, 1);
-  saveData();
-  renderCurrentTab();
-  showToast('Item deleted');
-}
-
 // ── CALENDAR ──────────────────────────────────────────────────────
 function renderCalendar() {
   document.getElementById('calMonthLabel').innerText =
@@ -1380,7 +1288,7 @@ function renderExportTab() {
 }
 
 function exportCSV() {
-  const headers = ['meetingDate','title','owner','priority','status','dueDate','progress','notes'];
+  const headers = ['id','meetingDate','title','owner','priority','status','dueDate','progress','notes'];
   const rows    = items.map(i =>
     headers.map(h => `"${(String(i[h]||'')).replace(/"/g,'""')}"`).join(',')
   );
@@ -1419,18 +1327,30 @@ function processImportFile(file) {
       if (file.name.endsWith('.json')) {
         const parsed = JSON.parse(e.target.result);
         if (!Array.isArray(parsed)) throw new Error('Not an array');
-        items = parsed; saveData(); showToast(`Imported ${parsed.length} items ✓`);
+        
+        // Push items to SheetDB (you may want to clear it first or just append)
+        fetch(SHEETDB_URL, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: parsed })
+        }).then(() => refreshAll());
+        
       } else {
-        const keys  = ['meetingDate','title','owner','priority','status','dueDate','progress','notes'];
+        const keys  = ['id','meetingDate','title','owner','priority','status','dueDate','progress','notes'];
         const lines = e.target.result.split('\n').filter(l => l.trim());
         const parsed = lines.slice(1).map(line => {
           const vals = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)
                            .map(v => v.replace(/^"|"$/g,'').trim());
           return Object.fromEntries(keys.map((k,i) => [k, vals[i]||'']));
         }).filter(r => r.title);
-        items = parsed; saveData(); showToast(`Imported ${parsed.length} items ✓`);
+        
+        fetch(SHEETDB_URL, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: parsed })
+        }).then(() => refreshAll());
       }
-      renderCurrentTab();
+      showToast('Importing to SheetDB...');
     } catch(err) {
       showToast('⚠ Import failed — check format');
     }
@@ -1495,7 +1415,8 @@ function togglePassVisibility() {
 }
 
 async function showApp() {
-  await loadData(); // Wait for data to load from GitHub
+  loadSettings();
+  await loadData(); // Wait for data to load from SheetDB
   document.getElementById('appWrapper').classList.add('visible');
   
   renderDashboard();
@@ -1511,7 +1432,7 @@ async function showApp() {
 // Check if already authenticated this session
 if (sessionStorage.getItem('gsc_auth') === '1') {
   document.getElementById('loginScreen').classList.add('hidden');
-  showApp(); // Now async - will load GitHub data
+  showApp(); // Now async - will load SheetDB data
 }
 // Otherwise the login screen is already visible — wait for user input
 </script>
