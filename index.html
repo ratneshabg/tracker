@@ -143,12 +143,6 @@
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:6px; }
 
-    /* ── Toggle switch ── */
-    .toggle-bg { transition: background .2s; }
-    input:checked ~ .toggle-bg { background:#2563eb; }
-    input:checked ~ .toggle-bg .toggle-dot { transform:translateX(20px); }
-    .toggle-dot { transition:transform .2s; }
-
     /* ── Details arrow ── */
     details summary { list-style:none; }
     details summary::-webkit-details-marker { display:none; }
@@ -158,43 +152,30 @@
 </head>
 <body class="bg-gray-100 font-sans text-gray-800">
 
-<!-- ════════════════════════════════════════
-     LOGIN SCREEN
-════════════════════════════════════════ -->
 <div id="loginScreen">
-  <!-- Background effects -->
   <div class="blob blob-1"></div>
   <div class="blob blob-2"></div>
   <div class="blob blob-3"></div>
   <div class="login-grid"></div>
 
-  <!-- Login card -->
   <div class="login-card" id="loginCard">
-
-    <!-- Logo -->
     <div class="logo-badge">🌿</div>
-
-    <!-- Heading -->
     <div class="text-center mb-8">
       <h1 class="text-white text-2xl font-bold tracking-tight leading-tight">Group Sustainability Cell</h1>
       <p class="text-blue-300 text-sm mt-1.5 opacity-80">Meeting Action Dashboard</p>
       <div class="mt-3 h-px w-16 bg-gradient-to-r from-transparent via-blue-400 to-transparent mx-auto opacity-50"></div>
     </div>
 
-    <!-- Error message -->
     <div id="loginError" class="hidden mb-4 bg-red-500/20 border border-red-500/40 text-red-300 text-sm rounded-xl px-4 py-3 text-center">
       ⚠ Incorrect credentials. Please try again.
     </div>
 
-    <!-- Form -->
     <div class="space-y-4">
-
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-semibold text-blue-200 uppercase tracking-widest">Username</label>
         <input id="loginUser" type="text" placeholder="Enter your username"
           class="login-input" autocomplete="off" onkeydown="if(event.key==='Enter') doLogin()">
       </div>
-
       <div class="flex flex-col gap-1.5">
         <label class="text-xs font-semibold text-blue-200 uppercase tracking-widest">Password</label>
         <div class="relative">
@@ -203,7 +184,6 @@
           <button class="eye-btn" onclick="togglePassVisibility()" id="eyeBtn" title="Show/hide password">👁</button>
         </div>
       </div>
-
       <div class="pt-2">
         <button class="login-btn" onclick="doLogin()">
           Sign In →
@@ -211,21 +191,14 @@
       </div>
     </div>
 
-    <!-- Footer -->
     <p class="text-center text-xs text-white/25 mt-8">
       Group Sustainability Cell &copy; 2026 &nbsp;·&nbsp; All rights reserved
     </p>
   </div>
 </div>
 
-<!-- ════════════════════════════════════════
-     APP (hidden until login)
-════════════════════════════════════════ -->
 <div id="appWrapper" class="flex min-h-screen">
 
-  <!-- ════════════════════════════════════════
-       SIDEBAR
-  ════════════════════════════════════════ -->
   <aside class="w-64 bg-gradient-to-b from-slate-950 to-blue-950 text-white p-5 hidden md:flex flex-col flex-shrink-0">
     <h1 class="sidebar-title text-xl font-bold mb-8 tracking-tight leading-tight">Meeting Actions</h1>
 
@@ -246,21 +219,15 @@
       <p class="text-xs mt-1 text-gray-400" id="sidebarSyncTime">Last synced just now</p>
     </div>
 
-    <!-- Logout -->
     <button onclick="doLogout()"
       class="mt-4 w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-red-300 hover:bg-red-500/20 transition-all">
       <span>🚪</span> Sign Out
     </button>
   </aside>
 
-  <!-- ════════════════════════════════════════
-       MAIN CONTENT
-  ════════════════════════════════════════ -->
   <main class="flex-1 overflow-auto">
 
-    <!-- ── DASHBOARD ───────────────────────────────────── -->
     <div id="view-dashboard" class="tab-view active p-6">
-
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
           <h1 class="text-3xl font-bold">Dashboard</h1>
@@ -272,31 +239,25 @@
         </div>
       </div>
 
-      <!-- KPI Cards -->
-      <div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-2xl shadow p-5 border-l-4 border-blue-500">
-          <p class="text-gray-500 text-xs font-medium uppercase tracking-wide">Total</p>
+          <p class="text-gray-500 text-xs font-medium uppercase tracking-wide">Total Items</p>
           <p id="totalItems" class="text-3xl font-bold mt-1">0</p>
         </div>
-        <div class="bg-white rounded-2xl shadow p-5 border-l-4 border-green-500">
-          <p class="text-green-600 text-xs font-medium uppercase tracking-wide">Completed</p>
-          <p id="completedItems" class="text-3xl font-bold mt-1">0</p>
+        <div class="bg-gray-50 rounded-lg p-4 text-center hover:bg-gray-100 transition shadow">
+          <div class="text-gray-500 text-xs font-medium mb-1.5 uppercase tracking-wide">Not Started</div>
+          <div id="pendingItems" class="text-2xl font-bold text-gray-700">0</div>
         </div>
-        <div class="bg-white rounded-2xl shadow p-5 border-l-4 border-yellow-400">
-          <p class="text-yellow-600 text-xs font-medium uppercase tracking-wide">In Progress</p>
-          <p id="progressItems" class="text-3xl font-bold mt-1">0</p>
+        <div class="bg-yellow-50 rounded-lg p-4 text-center hover:bg-yellow-100 transition shadow">
+          <div class="text-yellow-600 text-xs font-medium mb-1.5 uppercase tracking-wide">In Progress</div>
+          <div id="progressItems" class="text-2xl font-bold text-yellow-700">0</div>
         </div>
-        <div class="bg-white rounded-2xl shadow p-5 border-l-4 border-red-400">
-          <p class="text-red-500 text-xs font-medium uppercase tracking-wide">Pending</p>
-          <p id="pendingItems" class="text-3xl font-bold mt-1">0</p>
-        </div>
-        <div class="bg-white rounded-2xl shadow p-5 border-l-4 border-purple-500">
-          <p class="text-purple-600 text-xs font-medium uppercase tracking-wide">Overdue</p>
-          <p id="overdueItems" class="text-3xl font-bold mt-1">0</p>
+        <div class="bg-green-50 rounded-lg p-4 text-center hover:bg-green-100 transition shadow">
+          <div class="text-green-600 text-xs font-medium mb-1.5 uppercase tracking-wide">Completed</div>
+          <div id="completedItems" class="text-2xl font-bold text-green-700">0</div>
         </div>
       </div>
 
-      <!-- Charts row -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
         <div class="bg-white p-5 rounded-2xl shadow">
           <h2 class="font-semibold text-sm text-gray-600 mb-4">Status Breakdown</h2>
@@ -321,7 +282,6 @@
         </div>
       </div>
 
-      <!-- Recent + Owner board -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div class="bg-white rounded-2xl shadow p-5">
           <h2 class="font-semibold text-sm text-gray-600 mb-4">Recent Activity</h2>
@@ -335,9 +295,7 @@
     </div>
 
 
-    <!-- ── ALL ITEMS ────────────────────────────────────── -->
     <div id="view-all-items" class="tab-view p-6">
-
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-4">
         <div>
           <h1 class="text-3xl font-bold">All Action Items</h1>
@@ -346,20 +304,21 @@
         <button onclick="switchTab('add-item')" class="bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 text-sm font-medium">+ Add Item</button>
       </div>
 
-      <!-- Filter bar -->
       <div class="bg-white rounded-2xl shadow p-4 mb-5 flex flex-wrap gap-3 items-center">
         <input id="allSearchInput" type="text" placeholder="🔍  Search title or owner…"
           class="border rounded-xl px-4 py-2 text-sm flex-1 min-w-44 outline-none focus:ring-2 focus:ring-blue-300"
           oninput="renderAllItems()">
-        <select id="filterStatus"   class="border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-300" onchange="renderAllItems()">
+        <select id="filterStatus" class="border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-300" onchange="renderAllItems()">
           <option value="">All Status</option>
-          <option>Completed</option><option>In Progress</option><option>Pending</option><option>Overdue</option>
+          <option value="Not Started">Not Started</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
         </select>
         <select id="filterPriority" class="border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-300" onchange="renderAllItems()">
           <option value="">All Priority</option>
           <option>High</option><option>Medium</option><option>Low</option>
         </select>
-        <select id="filterOwner"    class="border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-300" onchange="renderAllItems()">
+        <select id="filterOwner" class="border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-300" onchange="renderAllItems()">
           <option value="">All Owners</option>
         </select>
         <button onclick="clearFilters()" class="text-sm text-blue-600 hover:underline">Clear</button>
@@ -386,14 +345,12 @@
     </div>
 
 
-    <!-- ── ADD ITEM ─────────────────────────────────────── -->
     <div id="view-add-item" class="tab-view p-6">
       <h1 class="text-3xl font-bold mb-1">Add Action Item</h1>
       <p class="text-gray-500 text-sm mb-7">Create a new meeting action and assign an owner</p>
 
       <div class="bg-white rounded-2xl shadow p-8 max-w-3xl">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-
           <div class="flex flex-col gap-1">
             <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Meeting Date *</label>
             <input id="f-meetingDate" type="date" class="border rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
@@ -414,8 +371,10 @@
           </div>
           <div class="flex flex-col gap-1">
             <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</label>
-            <select id="f-status" class="border rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-              <option selected>Pending</option><option>In Progress</option><option>Completed</option><option>Overdue</option>
+            <select id="f-status" name="status" required class="border rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+              <option value="Not Started" selected>Not Started</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
             </select>
           </div>
           <div class="flex flex-col gap-1">
@@ -441,7 +400,6 @@
     </div>
 
 
-    <!-- ── CALENDAR ─────────────────────────────────────── -->
     <div id="view-calendar" class="tab-view p-6">
       <div class="flex justify-between items-center mb-5 flex-wrap gap-3">
         <h1 class="text-3xl font-bold">Calendar View</h1>
@@ -474,7 +432,6 @@
     </div>
 
 
-    <!-- ── REPORTS ──────────────────────────────────────── -->
     <div id="view-reports" class="tab-view p-6">
       <h1 class="text-3xl font-bold mb-1">Reports</h1>
       <p class="text-gray-500 text-sm mb-7">Analytics and performance metrics</p>
@@ -519,7 +476,6 @@
                 <th class="p-3">Total</th>
                 <th class="p-3 text-green-600">Done</th>
                 <th class="p-3 text-yellow-600">In Progress</th>
-                <th class="p-3 text-purple-600">Overdue</th>
                 <th class="p-3">Avg Progress</th>
               </tr>
             </thead>
@@ -530,14 +486,11 @@
     </div>
 
 
-    <!-- ── EXPORT / IMPORT ──────────────────────────────── -->
     <div id="view-export" class="tab-view p-6">
       <h1 class="text-3xl font-bold mb-1">Export / Import</h1>
       <p class="text-gray-500 text-sm mb-7">Download your data or load from CSV / JSON</p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mb-6">
-
-        <!-- Export -->
         <div class="bg-white rounded-2xl shadow p-6">
           <h2 class="text-base font-bold mb-5 text-gray-700">⬇ Export Data</h2>
           <div class="space-y-3">
@@ -565,7 +518,6 @@
           </div>
         </div>
 
-        <!-- Import -->
         <div class="bg-white rounded-2xl shadow p-6">
           <h2 class="text-base font-bold mb-5 text-gray-700">⬆ Import Data</h2>
           <div id="dropZone"
@@ -585,7 +537,6 @@
         </div>
       </div>
 
-      <!-- Summary -->
       <div class="bg-white rounded-2xl shadow p-5 max-w-4xl">
         <h2 class="font-semibold text-sm text-gray-600 mb-4">Data Summary</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm">
@@ -602,21 +553,19 @@
             <p class="text-gray-500 mt-1 text-xs">Unique Owners</p>
           </div>
           <div class="bg-gray-50 rounded-xl p-4 flex items-center justify-center">
-            <button onclick="if(confirm('This will delete ALL data and reload defaults. Continue?')){ items=defaultItems(); saveData(); showToast('Data reset ✓'); }"
-              class="text-red-500 text-xs hover:underline">⚠ Reset All Data</button>
+            <button onclick="if(confirm('This will load defaults over current unsynced data. Continue?')){ items=defaultItems(); saveData(); showToast('Data reset ✓'); }"
+              class="text-red-500 text-xs hover:underline">⚠ Reset to Defaults</button>
           </div>
         </div>
       </div>
     </div>
 
 
-    <!-- ── SETTINGS ─────────────────────────────────────── -->
     <div id="view-settings" class="tab-view p-6 max-w-2xl">
       <h1 class="text-3xl font-bold mb-1">Settings</h1>
       <p class="text-gray-500 text-sm mb-7">Customise dashboard behaviour</p>
 
       <div class="space-y-4">
-
         <div class="bg-white rounded-2xl shadow p-5 flex justify-between items-center gap-4">
           <div>
             <p class="font-medium text-sm">Default Priority</p>
@@ -633,9 +582,11 @@
             <p class="font-medium text-sm">Default Status</p>
             <p class="text-xs text-gray-400 mt-0.5">Pre-fill when adding items</p>
           </div>
-          <select id="set-status" class="border rounded-xl px-3 py-2 text-sm outline-none"
+          <select id="set-status" class="w-44 p-2.5 border rounded-lg outline-none text-sm"
             onchange="saveSetting('defaultStatus', this.value)">
-            <option selected>Pending</option><option>In Progress</option>
+            <option value="Not Started">Not Started</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
           </select>
         </div>
 
@@ -648,22 +599,6 @@
             class="border rounded-xl px-3 py-2 text-sm w-44 outline-none focus:ring-2 focus:ring-blue-300"
             onchange="saveSetting('dashName', this.value); document.querySelectorAll('.sidebar-title').forEach(el=>el.innerText=this.value)">
         </div>
-
-        <div class="bg-white rounded-2xl shadow p-5 flex justify-between items-center gap-4">
-          <div>
-            <p class="font-medium text-sm">Overdue Auto-flag</p>
-            <p class="text-xs text-gray-400 mt-0.5">Mark past-due Pending/In-Progress items as Overdue on load</p>
-          </div>
-          <label class="relative inline-flex items-center cursor-pointer select-none">
-            <input id="set-autoflag" type="checkbox" checked class="sr-only peer"
-              onchange="saveSetting('autoFlag', this.checked)">
-            <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-blue-600
-              after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white
-              after:rounded-full after:h-5 after:w-5 after:transition-all
-              peer-checked:after:translate-x-full transition-colors"></div>
-          </label>
-        </div>
-
       </div>
 
       <div class="mt-6 bg-blue-50 border border-blue-100 rounded-2xl p-4 text-xs text-blue-600">
@@ -673,13 +608,10 @@
     </div>
 
 
-    <!-- ── HELP ─────────────────────────────────────────── -->
     <div id="view-help" class="tab-view p-6 max-w-3xl">
       <h1 class="text-3xl font-bold mb-1">Help & Guide</h1>
       <p class="text-gray-500 text-sm mb-7">Quick answers and usage tips</p>
-
       <div class="space-y-3">
-
         <details class="bg-white rounded-2xl shadow p-5" open>
           <summary class="font-semibold text-sm cursor-pointer flex justify-between items-center">
             How do I add a new action item?
@@ -687,15 +619,13 @@
           </summary>
           <p class="text-sm text-gray-500 mt-3 leading-relaxed">Click <strong>Add New Item</strong> in the sidebar, or press <kbd class="bg-gray-100 border rounded px-1">N</kbd>. Fill in Meeting Date, Action Item, and Owner (required), then click Save. The item appears instantly in All Action Items and the Dashboard.</p>
         </details>
-
         <details class="bg-white rounded-2xl shadow p-5">
           <summary class="font-semibold text-sm cursor-pointer flex justify-between items-center">
             How do I edit an existing item?
             <span class="arrow text-blue-500 text-lg leading-none">+</span>
           </summary>
-          <p class="text-sm text-gray-500 mt-3 leading-relaxed">Go to <strong>All Action Items</strong>, find the row, and click the <em>Edit</em> button. A modal opens with all fields pre-filled. Update any field and click <em>Save Changes</em>.</p>
+          <p class="text-sm text-gray-500 mt-3 leading-relaxed">Go to <strong>All Action Items</strong>, find the row, and click the <em>Edit</em> button. A modal opens with all fields pre-filled. Update any field and click <em>Save Changes</em>. You can also quickly edit Status and Progress inline on the table!</p>
         </details>
-
         <details class="bg-white rounded-2xl shadow p-5">
           <summary class="font-semibold text-sm cursor-pointer flex justify-between items-center">
             How does the Calendar View work?
@@ -703,49 +633,17 @@
           </summary>
           <p class="text-sm text-gray-500 mt-3 leading-relaxed">The Calendar plots items by their <em>due date</em>. Navigate months with Prev / Next. Dots are colour-coded: red = High priority, yellow = Medium, green = Low / Completed. Today's date has a blue border.</p>
         </details>
-
-        <details class="bg-white rounded-2xl shadow p-5">
-          <summary class="font-semibold text-sm cursor-pointer flex justify-between items-center">
-            How do I sort or filter the table?
-            <span class="arrow text-blue-500 text-lg leading-none">+</span>
-          </summary>
-          <p class="text-sm text-gray-500 mt-3 leading-relaxed">Click any column header marked with ↕ to sort ascending / descending. Use the filter dropdowns above the table to narrow by Status, Priority, or Owner. The search box matches on title and owner name simultaneously.</p>
-        </details>
-
-        <details class="bg-white rounded-2xl shadow p-5">
-          <summary class="font-semibold text-sm cursor-pointer flex justify-between items-center">
-            How do I export or back up my data?
-            <span class="arrow text-blue-500 text-lg leading-none">+</span>
-          </summary>
-          <p class="text-sm text-gray-500 mt-3 leading-relaxed">Go to <strong>Export / Import</strong> and choose CSV (for Excel / Sheets) or JSON (for developers). Your file downloads immediately. To import, drag-and-drop a file into the import zone — CSV columns must match the listed order.</p>
-        </details>
-
         <details class="bg-white rounded-2xl shadow p-5">
           <summary class="font-semibold text-sm cursor-pointer flex justify-between items-center">
             Where is my data stored?
             <span class="arrow text-blue-500 text-lg leading-none">+</span>
           </summary>
-          <p class="text-sm text-gray-500 mt-3 leading-relaxed">All data lives in your browser's <code class="bg-gray-100 px-1 rounded">localStorage</code>. It persists between reloads on the same browser/device. Use Export regularly as a backup. The Reset button in Export / Import restores the original sample data.</p>
+          <p class="text-sm text-gray-500 mt-3 leading-relaxed">All data lives remotely on your designated GitHub repository via the API! Changes are saved automatically and sync across multiple devices every 30 seconds.</p>
         </details>
-
-        <div class="bg-blue-50 border border-blue-100 rounded-2xl p-5 mt-2">
-          <p class="font-semibold text-blue-700 text-sm mb-2">⌨ Keyboard Shortcuts</p>
-          <div class="grid grid-cols-2 gap-2 text-xs text-blue-600">
-            <span><kbd class="bg-white border rounded px-1.5 py-0.5 font-mono">D</kbd> — Dashboard</span>
-            <span><kbd class="bg-white border rounded px-1.5 py-0.5 font-mono">N</kbd> — Add New Item</span>
-          </div>
-        </div>
       </div>
     </div>
-
   </main>
-</div><!-- /appWrapper -->
-
-
-<!-- ════════════════════════════════════════
-     EDIT MODAL
-════════════════════════════════════════ -->
-<div id="editModal" class="fixed inset-0 bg-black/50 hidden justify-center items-center p-4 z-50">
+</div><div id="editModal" class="fixed inset-0 bg-black/50 hidden justify-center items-center p-4 z-50">
   <div class="bg-white rounded-2xl p-7 w-full max-w-2xl shadow-2xl">
     <h2 class="text-xl font-bold mb-5 text-gray-800">Edit Action Item</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -769,8 +667,10 @@
       </div>
       <div class="flex flex-col gap-1">
         <label class="text-xs text-gray-400">Status</label>
-        <select id="em-status" class="border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-300">
-          <option>Pending</option><option>In Progress</option><option>Completed</option><option>Overdue</option>
+        <select id="em-status" name="status" required class="border rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+          <option value="Not Started">Not Started</option>
+          <option value="In Progress">In Progress</option>
+          <option value="Completed">Completed</option>
         </select>
       </div>
       <div class="flex flex-col gap-1">
@@ -793,13 +693,8 @@
   </div>
 </div>
 
-<!-- Toast -->
 <div id="toast"></div>
 
-
-<!-- ════════════════════════════════════════
-     APPLICATION SCRIPT
-════════════════════════════════════════ -->
 <script>
 // ── Default seed data ─────────────────────────────────────────────
 function defaultItems() {
@@ -808,23 +703,19 @@ function defaultItems() {
     { meetingDate:'2026-05-20', title:'API integration with payment gate',   owner:'Mike Johnson', priority:'High',   status:'In Progress', dueDate:'2026-05-29', progress:40,  notes:'Backend pending' },
     { meetingDate:'2026-05-15', title:'Design homepage mockup v2',           owner:'Sara Lee',     priority:'High',   status:'Completed',   dueDate:'2026-05-18', progress:100, notes:'Figma link shared' },
     { meetingDate:'2026-05-15', title:'QA smoke test – sprint 12',           owner:'Ravi Kumar',   priority:'Medium', status:'Completed',   dueDate:'2026-05-17', progress:100, notes:'All P0 cases passed' },
-    { meetingDate:'2026-05-10', title:'Update SLA documentation for Q2',     owner:'Amy Chen',     priority:'Medium', status:'Pending',     dueDate:'2026-05-30', progress:10,  notes:'Draft started' },
+    { meetingDate:'2026-05-10', title:'Update SLA documentation for Q2',     owner:'Amy Chen',     priority:'Medium', status:'Not Started', dueDate:'2026-05-30', progress:0,   notes:'Draft started' },
     { meetingDate:'2026-05-10', title:'Migrate DB to new cluster',           owner:'Mike Johnson', priority:'High',   status:'In Progress', dueDate:'2026-05-25', progress:60,  notes:'Staging done, prod next' },
-    { meetingDate:'2026-05-08', title:'Write onboarding runbook',            owner:'John Doe',     priority:'Low',    status:'Pending',     dueDate:'2026-06-05', progress:5,   notes:'Outline drafted' },
-    { meetingDate:'2026-05-05', title:'Vendor invoice reconciliation',       owner:'Amy Chen',     priority:'High',   status:'Overdue',     dueDate:'2026-05-12', progress:30,  notes:'Waiting on finance' },
+    { meetingDate:'2026-05-08', title:'Write onboarding runbook',            owner:'John Doe',     priority:'Low',    status:'Not Started', dueDate:'2026-06-05', progress:0,   notes:'Outline drafted' },
+    { meetingDate:'2026-05-05', title:'Vendor invoice reconciliation',       owner:'Amy Chen',     priority:'High',   status:'In Progress', dueDate:'2026-05-12', progress:30,  notes:'Waiting on finance' },
     { meetingDate:'2026-05-05', title:'Set up CI/CD for mobile app',         owner:'Ravi Kumar',   priority:'High',   status:'In Progress', dueDate:'2026-05-28', progress:70,  notes:'GitHub Actions configured' },
     { meetingDate:'2026-04-28', title:'Annual leave policy review',          owner:'Sara Lee',     priority:'Low',    status:'Completed',   dueDate:'2026-05-02', progress:100, notes:'HR approved' },
-    { meetingDate:'2026-04-28', title:'Hotfix – auth token expiry bug',      owner:'Mike Johnson', priority:'High',   status:'Completed',   dueDate:'2026-04-29', progress:100, notes:'Released v2.1.4' },
-    { meetingDate:'2026-04-20', title:'Marketing deck for investor call',    owner:'John Doe',     priority:'Medium', status:'Overdue',     dueDate:'2026-04-30', progress:50,  notes:'Pending CEO review' },
+    { meetingDate:'2026-04-28', title:'Hotfix – auth token expiry bug',      owner:'Mike Johnson', priority:'High',   status:'Completed',   dueDate:'2026-04-29', progress:100, notes:'Released v2.1.4' }
   ];
 }
 
 // ── State ─────────────────────────────────────────────────────────
-let items    = JSON.parse(localStorage.getItem('meetingItems')) || defaultItems();
-let settings = JSON.parse(localStorage.getItem('dashSettings')) || {
-  defaultPriority: 'Medium', defaultStatus: 'Pending',
-  rowsPerPage: 25, autoFlag: true, dashName: 'Meeting Actions'
-};
+let items = [];
+let settings = {};
 let sortKey = 'meetingDate';
 let sortAsc = false;
 let _editIndex = null;
@@ -832,40 +723,174 @@ let _editIndex = null;
 const today    = new Date();
 let calYear    = today.getFullYear();
 let calMonth   = today.getMonth();
-
 const charts = {};
 
-// ── Persist settings ──────────────────────────────────────────────
-function saveSetting(key, val) {
-  settings[key] = val;
-  localStorage.setItem('dashSettings', JSON.stringify(settings));
-  showToast('Setting saved ✓');
-}
-
-// ── Auto-flag overdue ─────────────────────────────────────────────
-function autoFlagOverdue() {
-  if (!settings.autoFlag) return;
-  const todayStr = today.toISOString().split('T')[0];
-  items.forEach(item => {
-    if (['Pending','In Progress'].includes(item.status) && item.dueDate && item.dueDate < todayStr) {
-      item.status = 'Overdue';
-    }
-  });
-}
-
-// ── Save + re-render ──────────────────────────────────────────────
-function saveData() {
-  localStorage.setItem('meetingItems', JSON.stringify(items));
+// Ensure renderCurrentTab forwards to our renderAll mapping function
+function renderCurrentTab() {
   renderAll();
 }
 
-function refreshAll() {
-  autoFlagOverdue();
-  saveData();
-  showToast('Refreshed ✓');
+// ── GITHUB API CONFIGURATION ──────────────────────────────────────
+const GITHUB_CONFIG = {
+  owner: 'YOUR_GITHUB_USERNAME',        // Replace with your GitHub username
+  repo: 'YOUR_REPO_NAME',               // Replace with your repository name
+  path: 'data/tasks.json',              // Path to data file in repo
+  branch: 'main',                       // Branch name
+  token: 'YOUR_PERSONAL_ACCESS_TOKEN'   // GitHub Personal Access Token
+};
+
+let fileSha = null; // Track file SHA for GitHub updates
+
+// ── DATA PERSISTENCE (GITHUB SYNC) ────────────────────────────────
+async function saveData() {
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+    const payload = { items, settings };
+    const content = btoa(JSON.stringify(payload, null, 2));
+
+    const body = {
+      message: `Update dashboard data - ${new Date().toISOString()}`,
+      content: content,
+      branch: GITHUB_CONFIG.branch
+    };
+
+    if (fileSha) body.sha = fileSha;
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      fileSha = data.content.sha;
+      console.log('✓ Data synced to GitHub');
+    } else {
+      console.error('GitHub save failed:', response.status);
+      showToast('⚠ Sync failed. Check console.');
+    }
+  } catch (error) {
+    console.error('Save error:', error);
+    showToast('⚠ Could not sync to GitHub');
+  }
 }
 
-// ── Toast ─────────────────────────────────────────────────────────
+async function loadData() {
+  try {
+    const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}?ref=${GITHUB_CONFIG.branch}`;
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `token ${GITHUB_CONFIG.token}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      fileSha = data.sha;
+
+      const content = atob(data.content);
+      const payload = JSON.parse(content);
+
+      items = payload.items || [];
+      settings = payload.settings || {};
+
+      console.log('✓ Data loaded from GitHub');
+    } else if (response.status === 404) {
+      // File doesn't exist yet
+      items = defaultItems();
+      settings = {
+        defaultPriority: 'Medium', defaultStatus: 'Not Started',
+        rowsPerPage: 25, dashName: 'Meeting Actions'
+      };
+      await saveData(); // Create initial file
+      console.log('✓ Initialized new GitHub data file');
+    } else {
+      throw new Error(`GitHub API error: ${response.status}`);
+    }
+  } catch (error) {
+    console.error('Load error:', error);
+    if (!items.length) items = defaultItems();
+    settings = settings || {};
+    showToast('⚠ Using offline mode');
+  }
+}
+
+function loadSettings() {
+  settings = settings || {};
+}
+
+function saveSettings() {
+  saveData(); // Save everything together
+}
+
+function saveSetting(key, val) {
+  settings[key] = val;
+  saveData();
+  showToast('Setting saved ✓');
+}
+
+// Auto-sync every 30 seconds to catch updates from other devices
+setInterval(async () => {
+  const currentData = JSON.stringify(items);
+  await loadData();
+  const newData = JSON.stringify(items);
+
+  if (currentData !== newData) {
+    console.log('↻ Data updated from another device');
+    renderCurrentTab();
+    updateSidebarMeta();
+    showToast('📥 Synced from another device');
+  }
+}, 30000);
+
+// ── STATUS CONSTANTS ──────────────────────────────────────────────
+const VALID_STATUSES = {
+  NOT_STARTED: 'Not Started',
+  IN_PROGRESS: 'In Progress',
+  COMPLETED: 'Completed'
+};
+
+// Enforce status-progress synchronization
+function syncStatusProgress(item) {
+  item.progress = Math.max(0, Math.min(100, parseInt(item.progress) || 0));
+  if (item.progress === 0) {
+    item.status = VALID_STATUSES.NOT_STARTED;
+  } else if (item.progress === 100) {
+    item.status = VALID_STATUSES.COMPLETED;
+  } else {
+    item.status = VALID_STATUSES.IN_PROGRESS;
+  }
+  return item;
+}
+
+// Auto-set progress based on status
+function syncProgressStatus(item) {
+  if (item.status === VALID_STATUSES.NOT_STARTED) {
+    item.progress = 0;
+  } else if (item.status === VALID_STATUSES.COMPLETED) {
+    item.progress = 100;
+  } else if (item.status === VALID_STATUSES.IN_PROGRESS && item.progress === 0) {
+    item.progress = 1; // Start at 1% when moving to in progress
+  }
+  item.progress = Math.max(0, Math.min(100, parseInt(item.progress) || 0));
+  return item;
+}
+
+// ── Utilities ─────────────────────────────────────────────────────
+function refreshAll() {
+  loadData().then(() => {
+    renderAll();
+    showToast('Refreshed ✓');
+  });
+}
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.innerText = msg;
@@ -885,7 +910,6 @@ function switchTab(tab) {
   const link = document.querySelector(`[data-tab="${tab}"]`);
   if (link) link.classList.add('active-tab');
 
-  // Lazy render expensive tabs
   if (tab === 'dashboard')  renderDashboard();
   if (tab === 'all-items')  renderAllItems();
   if (tab === 'calendar')   renderCalendar();
@@ -914,7 +938,6 @@ function renderAll() {
   updateSidebarMeta();
 }
 
-// ── Sidebar meta ──────────────────────────────────────────────────
 function updateSidebarMeta() {
   const d = new Date();
   document.getElementById('sidebarItemCount').innerText = `${items.length} items tracked`;
@@ -922,59 +945,73 @@ function updateSidebarMeta() {
     `Last synced ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
 }
 
-// ── Helpers ───────────────────────────────────────────────────────
-const STATUS_COLOR = {
-  'Completed'  : 'bg-green-100 text-green-700',
-  'Pending'    : 'bg-red-100 text-red-600',
-  'In Progress': 'bg-yellow-100 text-yellow-700',
-  'Overdue'    : 'bg-purple-100 text-purple-700'
-};
 const PRIORITY_COLOR = {
   'High'  : 'bg-red-100 text-red-700',
   'Medium': 'bg-yellow-100 text-yellow-700',
   'Low'   : 'bg-green-100 text-green-700'
 };
 
-function progressBar(pct) {
-  const p = parseInt(pct) || 0;
-  const col = p === 100 ? 'bg-green-500' : p > 50 ? 'bg-blue-500' : 'bg-yellow-400';
-  return `<div class="bg-gray-200 rounded-full h-2"><div class="${col} h-2 rounded-full" style="width:${p}%"></div></div>
-          <p class="text-xs mt-0.5 text-gray-400">${p}%</p>`;
+function statusBadge(st) {
+  const colors = {
+    'Not Started': 'bg-gray-100 text-gray-700',
+    'In Progress': 'bg-yellow-100 text-yellow-700',
+    'Completed': 'bg-green-100 text-green-700'
+  };
+  const col = colors[st] || 'bg-gray-100 text-gray-700';
+  return `<span class="px-3 py-1 rounded-full text-xs font-semibold ${col}">${st}</span>`;
 }
 
 function destroyChart(id) {
   if (charts[id]) { charts[id].destroy(); delete charts[id]; }
 }
 
+// Quick update functions for inline editing
+function quickUpdateStatus(idx, newStatus) {
+  if (!VALID_STATUSES[Object.keys(VALID_STATUSES).find(k => VALID_STATUSES[k] === newStatus)]) {
+    console.warn('Invalid status:', newStatus);
+    return;
+  }
+  items[idx].status = newStatus;
+  syncProgressStatus(items[idx]);
+  saveData();
+  renderCurrentTab();
+  updateSidebarMeta();
+}
+
+function quickUpdateProgress(idx, newProgress) {
+  newProgress = Math.max(0, Math.min(100, parseInt(newProgress) || 0));
+  items[idx].progress = newProgress;
+  syncStatusProgress(items[idx]);
+  saveData();
+  renderCurrentTab();
+  updateSidebarMeta();
+}
+
 // ── DASHBOARD ─────────────────────────────────────────────────────
 function renderDashboard() {
-  const total  = items.length;
-  const done   = items.filter(i => i.status === 'Completed').length;
-  const prog   = items.filter(i => i.status === 'In Progress').length;
-  const pend   = items.filter(i => i.status === 'Pending').length;
-  const over   = items.filter(i => i.status === 'Overdue').length;
+  const total       = items.length;
+  const completed   = items.filter(i => i.status === 'Completed').length;
+  const inProgress  = items.filter(i => i.status === 'In Progress').length;
+  const notStarted  = items.filter(i => i.status === 'Not Started').length;
 
   document.getElementById('totalItems').innerText     = total;
-  document.getElementById('completedItems').innerText = done;
-  document.getElementById('progressItems').innerText  = prog;
-  document.getElementById('pendingItems').innerText   = pend;
-  document.getElementById('overdueItems').innerText   = over;
+  document.getElementById('completedItems').innerText = completed;
+  document.getElementById('progressItems').innerText  = inProgress;
+  document.getElementById('pendingItems').innerText   = notStarted;
 
-  // Completion ring
-  const pct = total ? Math.round(done / total * 100) : 0;
+  const pct = total ? Math.round(completed / total * 100) : 0;
   const circ = 276.5;
   document.getElementById('completionRing').style.strokeDashoffset = circ - (circ * pct / 100);
   document.getElementById('completionPct').innerText = pct + '%';
 
-  // Status doughnut
   destroyChart('statusChart');
   charts['statusChart'] = new Chart(document.getElementById('statusChart'), {
     type: 'doughnut',
     data: {
-      labels: ['Completed','In Progress','Pending','Overdue'],
+      labels: ['Completed','In Progress','Not Started'],
       datasets: [{
-        data: [done, prog, pend, over],
-        backgroundColor: ['#10b981','#f59e0b','#f87171','#a78bfa'],
+        data: [completed, inProgress, notStarted],
+        backgroundColor: ['#10b981','#f59e0b','#9ca3af'],
         borderWidth: 0
       }]
     },
@@ -984,7 +1021,6 @@ function renderDashboard() {
     }
   });
 
-  // Priority bar
   destroyChart('priorityChart');
   charts['priorityChart'] = new Chart(document.getElementById('priorityChart'), {
     type: 'bar',
@@ -1007,12 +1043,11 @@ function renderDashboard() {
     }
   });
 
-  // Recent activity
   const recent = [...items].sort((a,b)=>b.meetingDate.localeCompare(a.meetingDate)).slice(0,5);
   document.getElementById('recentActivity').innerHTML = recent.map(i =>
     `<li class="flex items-start gap-2 text-sm">
       <span class="mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${
-        i.status==='Completed'?'bg-green-500':i.status==='Overdue'?'bg-purple-400':'bg-yellow-400'}"></span>
+        i.status==='Completed'?'bg-green-500':i.status==='In Progress'?'bg-yellow-400':'bg-gray-400'}"></span>
       <span>
         <span class="font-medium text-gray-700">${i.title}</span>
         <span class="text-gray-400"> — ${i.owner}</span>
@@ -1021,7 +1056,6 @@ function renderDashboard() {
     </li>`
   ).join('');
 
-  // Owner leaderboard
   const ownerMap = {};
   items.forEach(i => { ownerMap[i.owner] = (ownerMap[i.owner]||0) + 1; });
   const sorted = Object.entries(ownerMap).sort((a,b)=>b[1]-a[1]);
@@ -1044,7 +1078,6 @@ function renderAllItems() {
   const fPri    = document.getElementById('filterPriority')?.value || '';
   const fOwner  = document.getElementById('filterOwner')?.value   || '';
 
-  // Rebuild owner dropdown
   const sel = document.getElementById('filterOwner');
   if (sel) {
     const cur = sel.value;
@@ -1053,7 +1086,6 @@ function renderAllItems() {
       owners.map(o=>`<option${o===cur?' selected':''}>${o}</option>`).join('');
   }
 
-  // Filter
   let filtered = items.filter(item =>
     (!search  || item.title.toLowerCase().includes(search) || item.owner.toLowerCase().includes(search)) &&
     (!fStatus || item.status   === fStatus) &&
@@ -1061,13 +1093,11 @@ function renderAllItems() {
     (!fOwner  || item.owner    === fOwner)
   );
 
-  // Sort
   filtered = [...filtered].sort((a,b) => {
     const va = String(a[sortKey]||''), vb = String(b[sortKey]||'');
     return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
   });
 
-  // Sort indicators
   ['meetingDate','title','owner','dueDate'].forEach(k => {
     const el = document.getElementById('sort-'+k);
     if (el) el.innerText = sortKey===k ? (sortAsc?'↑':'↓') : '↕';
@@ -1094,11 +1124,21 @@ function renderAllItems() {
         <td class="p-3">
           <span class="${PRIORITY_COLOR[item.priority]||''} px-2.5 py-1 rounded-full text-xs font-semibold">${item.priority}</span>
         </td>
-        <td class="p-3">
-          <span class="${STATUS_COLOR[item.status]||''} px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap">${item.status}</span>
+        <td class="p-3 whitespace-nowrap">
+          <select onchange="quickUpdateStatus(${realIdx}, this.value)" class="text-xs border border-gray-300 rounded p-1 outline-none bg-white focus:ring-2 focus:ring-blue-300 w-full min-w-28">
+            <option value="Not Started" ${item.status==='Not Started'?'selected':''}>Not Started</option>
+            <option value="In Progress" ${item.status==='In Progress'?'selected':''}>In Progress</option>
+            <option value="Completed" ${item.status==='Completed'?'selected':''}>Completed</option>
+          </select>
         </td>
         <td class="p-3 text-gray-400 text-xs whitespace-nowrap">${item.dueDate}</td>
-        <td class="p-3 w-32">${progressBar(item.progress)}</td>
+        <td class="p-3 w-32 flex items-center gap-1">
+          <input type="number" min="0" max="100" value="${item.progress}"
+            onchange="quickUpdateProgress(${realIdx}, this.value)"
+            oninput="this.value = Math.max(0, Math.min(100, parseInt(this.value) || 0))"
+            class="w-14 text-xs border border-gray-300 rounded p-1 outline-none text-center bg-white focus:ring-2 focus:ring-blue-300">
+          <span class="text-gray-400 text-xs font-medium">%</span>
+        </td>
         <td class="p-3 text-gray-400 text-xs max-w-[140px] truncate">${item.notes}</td>
         <td class="p-3 whitespace-nowrap">
           <button onclick="openEditModal(${realIdx})"
@@ -1132,7 +1172,7 @@ function openEditModal(idx) {
   document.getElementById('em-title').value       = item.title       || '';
   document.getElementById('em-owner').value       = item.owner       || '';
   document.getElementById('em-priority').value    = item.priority    || 'Medium';
-  document.getElementById('em-status').value      = item.status      || 'Pending';
+  document.getElementById('em-status').value      = item.status      || 'Not Started';
   document.getElementById('em-dueDate').value     = item.dueDate     || '';
   document.getElementById('em-progress').value    = item.progress    || 0;
   document.getElementById('em-notes').value       = item.notes       || '';
@@ -1148,18 +1188,21 @@ function closeEditModal() {
 
 function saveEditItem() {
   if (_editIndex === null) return;
-  items[_editIndex] = {
-    meetingDate : document.getElementById('em-meetingDate').value,
-    title       : document.getElementById('em-title').value,
-    owner       : document.getElementById('em-owner').value,
-    priority    : document.getElementById('em-priority').value,
-    status      : document.getElementById('em-status').value,
-    dueDate     : document.getElementById('em-dueDate').value,
-    progress    : parseInt(document.getElementById('em-progress').value) || 0,
-    notes       : document.getElementById('em-notes').value,
-  };
+  items[_editIndex].meetingDate = document.getElementById('em-meetingDate').value;
+  items[_editIndex].title       = document.getElementById('em-title').value;
+  items[_editIndex].owner       = document.getElementById('em-owner').value;
+  items[_editIndex].priority    = document.getElementById('em-priority').value;
+  items[_editIndex].status      = document.getElementById('em-status').value;
+  items[_editIndex].dueDate     = document.getElementById('em-dueDate').value;
+  items[_editIndex].progress    = parseInt(document.getElementById('em-progress').value) || 0;
+  items[_editIndex].notes       = document.getElementById('em-notes').value;
+
+  syncProgressStatus(items[_editIndex]);
+
   saveData();
   closeEditModal();
+  renderCurrentTab();
+  updateSidebarMeta();
   showToast('Item updated ✓');
 }
 
@@ -1172,7 +1215,8 @@ function submitFormItem() {
     showToast('⚠ Please fill Meeting Date, Action Item and Owner');
     return;
   }
-  items.push({
+
+  const newItem = {
     meetingDate : mDate,
     title       : title,
     owner       : owner,
@@ -1181,9 +1225,18 @@ function submitFormItem() {
     dueDate     : document.getElementById('f-dueDate').value,
     progress    : parseInt(document.getElementById('f-progress').value) || 0,
     notes       : document.getElementById('f-notes').value,
-  });
+  };
+
+  syncProgressStatus(newItem);
+
+  items.push(newItem);
   saveData();
   clearForm();
+
+  renderAllItems();
+  updateSidebarMeta();
+  renderDashboard();
+
   showToast('Item added ✓');
   switchTab('all-items');
 }
@@ -1193,8 +1246,10 @@ function clearForm() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   });
+  const todayStr = new Date().toISOString().split('T')[0];
+  document.getElementById('f-meetingDate').value = todayStr;
   document.getElementById('f-priority').value   = settings.defaultPriority || 'Medium';
-  document.getElementById('f-status').value     = settings.defaultStatus   || 'Pending';
+  document.getElementById('f-status').value     = settings.defaultStatus   || 'Not Started';
   document.getElementById('f-progress').value   = 0;
   document.getElementById('f-progressVal').innerText = '0%';
 }
@@ -1204,6 +1259,7 @@ function deleteItem(idx) {
   if (!confirm('Delete this action item?')) return;
   items.splice(idx, 1);
   saveData();
+  renderCurrentTab();
   showToast('Item deleted');
 }
 
@@ -1216,7 +1272,6 @@ function renderCalendar() {
   const daysCount = new Date(calYear, calMonth + 1, 0).getDate();
   const todayStr  = today.toISOString().split('T')[0];
 
-  // Group by due date
   const byDate = {};
   items.forEach(item => {
     if (!item.dueDate) return;
@@ -1263,7 +1318,6 @@ function renderReports() {
   document.getElementById('rpt-highPriority').innerText  = items.filter(i=>i.priority==='High').length;
   document.getElementById('rpt-owners').innerText        = owners.length;
 
-  // Owner horizontal bar
   const ownerCounts = owners.map(o => items.filter(i=>i.owner===o).length);
   destroyChart('rptOwnerChart');
   charts['rptOwnerChart'] = new Chart(document.getElementById('rptOwnerChart'), {
@@ -1279,7 +1333,6 @@ function renderReports() {
     }
   });
 
-  // Priority pie
   destroyChart('rptPriorityChart');
   charts['rptPriorityChart'] = new Chart(document.getElementById('rptPriorityChart'), {
     type: 'doughnut',
@@ -1301,7 +1354,6 @@ function renderReports() {
     }
   });
 
-  // Owner performance table
   document.getElementById('rptOwnerTable').innerHTML = owners.sort().map(o => {
     const mine    = items.filter(i=>i.owner===o);
     const avgProg = Math.round(mine.reduce((s,i)=>s+parseInt(i.progress||0),0)/mine.length);
@@ -1310,8 +1362,12 @@ function renderReports() {
       <td class="p-3">${mine.length}</td>
       <td class="p-3 text-green-600 font-medium">${mine.filter(i=>i.status==='Completed').length}</td>
       <td class="p-3 text-yellow-600 font-medium">${mine.filter(i=>i.status==='In Progress').length}</td>
-      <td class="p-3 text-purple-600 font-medium">${mine.filter(i=>i.status==='Overdue').length}</td>
-      <td class="p-3 w-36">${progressBar(avgProg)}</td>
+      <td class="p-3 w-36">
+        <div class="bg-gray-200 rounded-full h-2">
+          <div class="bg-blue-500 h-2 rounded-full" style="width:${avgProg}%"></div>
+        </div>
+        <p class="text-xs mt-0.5 text-gray-400">${avgProg}%</p>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -1374,6 +1430,7 @@ function processImportFile(file) {
         }).filter(r => r.title);
         items = parsed; saveData(); showToast(`Imported ${parsed.length} items ✓`);
       }
+      renderCurrentTab();
     } catch(err) {
       showToast('⚠ Import failed — check format');
     }
@@ -1383,10 +1440,9 @@ function processImportFile(file) {
 
 // ── SETTINGS UI ───────────────────────────────────────────────────
 function applySettingsUI() {
-  document.getElementById('set-priority').value   = settings.defaultPriority || 'Medium';
-  document.getElementById('set-status').value     = settings.defaultStatus   || 'Pending';
-  document.getElementById('set-autoflag').checked = settings.autoFlag !== false;
-  document.getElementById('set-dashName').value   = settings.dashName || 'Meeting Actions';
+  document.getElementById('set-priority').value = settings.defaultPriority || 'Medium';
+  document.getElementById('set-status').value   = settings.defaultStatus || 'Not Started';
+  document.getElementById('set-dashName').value = settings.dashName || 'Meeting Actions';
 }
 
 // ── LOGIN / LOGOUT ────────────────────────────────────────────────
@@ -1397,7 +1453,6 @@ function doLogin() {
   const p = document.getElementById('loginPass').value;
 
   if (u === CREDENTIALS.user && p === CREDENTIALS.pass) {
-    // Success
     sessionStorage.setItem('gsc_auth', '1');
     const screen = document.getElementById('loginScreen');
     screen.style.transition = 'opacity .45s ease, transform .45s ease';
@@ -1408,12 +1463,11 @@ function doLogin() {
       showApp();
     }, 450);
   } else {
-    // Failure
     const err  = document.getElementById('loginError');
     const card = document.getElementById('loginCard');
     err.classList.remove('hidden');
     card.classList.remove('shake');
-    void card.offsetWidth; // reflow to restart animation
+    void card.offsetWidth;
     card.classList.add('shake');
     document.getElementById('loginPass').value = '';
     document.getElementById('loginPass').focus();
@@ -1422,7 +1476,6 @@ function doLogin() {
 
 function doLogout() {
   sessionStorage.removeItem('gsc_auth');
-  // Reset login UI
   document.getElementById('loginUser').value = '';
   document.getElementById('loginPass').value = '';
   document.getElementById('loginError').classList.add('hidden');
@@ -1441,10 +1494,10 @@ function togglePassVisibility() {
   else                         { inp.type = 'password'; btn.innerText = '👁'; }
 }
 
-function showApp() {
+async function showApp() {
+  await loadData(); // Wait for data to load from GitHub
   document.getElementById('appWrapper').classList.add('visible');
-  // Boot the app
-  autoFlagOverdue();
+  
   renderDashboard();
   renderAllItems();
   updateSidebarMeta();
@@ -1458,7 +1511,7 @@ function showApp() {
 // Check if already authenticated this session
 if (sessionStorage.getItem('gsc_auth') === '1') {
   document.getElementById('loginScreen').classList.add('hidden');
-  showApp();
+  showApp(); // Now async - will load GitHub data
 }
 // Otherwise the login screen is already visible — wait for user input
 </script>
