@@ -627,7 +627,7 @@
       </div>
       <div class="flex flex-col gap-1">
         <label class="text-xs text-gray-400">Status</label>
-        <select id="em-status" name="status" required class="border rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
+        <select id="em-status" name="status" required class="border rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none" onchange="handleEditStatusChange(this.value)">
           <option value="Not Started">Not Started</option>
           <option value="In Progress">In Progress</option>
           <option value="Completed">Completed</option>
@@ -895,9 +895,20 @@ function closeEditModal() {
   modal.classList.remove('flex');
 }
 
+// Live status → progress sync inside the edit modal
+function handleEditStatusChange(status) {
+  const progressField = document.getElementById('em-progress');
+  if (status === 'Completed') {
+    progressField.value = 100;
+  } else if (status === 'Not Started') {
+    progressField.value = 0;
+  }
+  // For 'In Progress', leave whatever value is already there
+}
+
 function saveEditItem() {
   if (_editIndex === null) return;
-  
+
   // Extract values from modal
   const updatedItem = items[_editIndex];
   updatedItem.meetingDate = document.getElementById('em-meetingDate').value;
@@ -908,33 +919,44 @@ function saveEditItem() {
   updatedItem.progress    = parseInt(document.getElementById('em-progress').value) || 0;
   updatedItem.notes       = document.getElementById('em-notes').value;
 
-  // Sync logical coherence between status and progress
+  // Final sync: status drives progress (in case user typed progress directly)
   if (updatedItem.status === 'Completed') updatedItem.progress = 100;
-  else if (updatedItem.progress === 100) updatedItem.status = 'Completed';
   else if (updatedItem.status === 'Not Started') updatedItem.progress = 0;
-  else if (updatedItem.progress > 0 && updatedItem.progress < 100) updatedItem.status = 'In Progress';
+  else if (updatedItem.progress === 100) updatedItem.status = 'Completed';
+  else if (updatedItem.progress === 0) updatedItem.status = 'Not Started';
+  else updatedItem.status = 'In Progress';
 
-  // Send to SheetDB (Update Row by ID)
+  // Determine which column/value to use for the SheetDB PATCH lookup
+  // Prefer the unique 'id' field; fall back to 'title' for pre-existing rows without one
+  let patchUrl;
   if (updatedItem.id) {
-    fetch(`${SHEETDB_URL}/id/${updatedItem.id}`, {
-      method: 'PUT',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: updatedItem })
-    })
-    .then(response => {
-      if (!response.ok) {
-        console.error('SheetDB PUT error:', response.status);
-        showToast('⚠ Failed to update in SheetDB');
-        return;
-      }
-      console.log('✓ Item updated in SheetDB');
-      showToast('Item updated ✓');
-    })
-    .catch(error => {
-      console.error('SheetDB PUT error:', error);
-      showToast('⚠ Error updating SheetDB: ' + error.message);
-    });
+    patchUrl = `${SHEETDB_URL}/id/${encodeURIComponent(updatedItem.id)}`;
+  } else {
+    // Assign a new id so future edits use the fast path
+    updatedItem.id = 'ID_' + Date.now();
+    patchUrl = `${SHEETDB_URL}/title/${encodeURIComponent(updatedItem.title)}`;
   }
+
+  // Use PATCH – updates only the matching row's fields without replacing others
+  fetch(patchUrl, {
+    method: 'PATCH',
+    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: updatedItem })
+  })
+  .then(async response => {
+    if (!response.ok) {
+      const errText = await response.text().catch(() => response.status);
+      console.error('SheetDB PATCH error:', errText);
+      showToast('⚠ Failed to update in SheetDB');
+      return;
+    }
+    console.log('✓ Item updated in SheetDB');
+    showToast('Item updated ✓');
+  })
+  .catch(error => {
+    console.error('SheetDB PATCH error:', error);
+    showToast('⚠ Error updating SheetDB: ' + error.message);
+  });
 
   closeEditModal();
   renderCurrentTab();
