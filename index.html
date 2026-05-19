@@ -620,7 +620,7 @@
             How do I edit an existing item?
             <span class="arrow text-blue-500 text-lg leading-none">+</span>
           </summary>
-          <p class="text-sm text-gray-500 mt-3 leading-relaxed">Go to <strong>All Action Items</strong>, find the row, and click the <em>Edit</em> button. A modal opens with all fields pre-filled. Update any field and click <em>Save Changes</em>. You can also quickly edit Status and Progress inline on the table!</p>
+          <p class="text-sm text-gray-500 mt-3 leading-relaxed">Go to <strong>All Action Items</strong>, find the row, and click the <em>Edit</em> button. A modal opens with all fields pre-filled. Update any field and click <em>Save Changes</em>.</p>
         </details>
         <details class="bg-white rounded-2xl shadow p-5">
           <summary class="font-semibold text-sm cursor-pointer flex justify-between items-center">
@@ -639,7 +639,9 @@
       </div>
     </div>
   </main>
-</div><div id="editModal" class="fixed inset-0 bg-black/50 hidden justify-center items-center p-4 z-50">
+</div>
+
+<div id="editModal" class="fixed inset-0 bg-black/50 hidden justify-center items-center p-4 z-50">
   <div class="bg-white rounded-2xl p-7 w-full max-w-2xl shadow-2xl">
     <h2 class="text-xl font-bold mb-5 text-gray-800">Edit Action Item</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -897,19 +899,52 @@ function submitFormItem() {
   switchTab('all-items');
 }
 
+// ── MODAL LOGIC FOR EDIT ─────────────────────────────────────────
+
+function openEditModal(idx) {
+  _editIndex = idx;
+  const item = items[idx];
+  
+  document.getElementById('em-meetingDate').value = item.meetingDate || '';
+  document.getElementById('em-title').value = item.title || '';
+  document.getElementById('em-owner').value = item.owner || '';
+  document.getElementById('em-priority').value = item.priority || 'Medium';
+  document.getElementById('em-status').value = item.status || 'Not Started';
+  document.getElementById('em-dueDate').value = item.dueDate || '';
+  document.getElementById('em-progress').value = item.progress || 0;
+  document.getElementById('em-notes').value = item.notes || '';
+
+  const modal = document.getElementById('editModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeEditModal() {
+  _editIndex = null;
+  const modal = document.getElementById('editModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
 function saveEditItem() {
   if (_editIndex === null) return;
-  items[_editIndex].meetingDate = document.getElementById('em-meetingDate').value;
-  items[_editIndex].title       = document.getElementById('em-title').value;
-  items[_editIndex].owner       = document.getElementById('em-owner').value;
-  items[_editIndex].priority    = document.getElementById('em-priority').value;
-  items[_editIndex].status      = document.getElementById('em-status').value;
-  items[_editIndex].dueDate     = document.getElementById('em-dueDate').value;
-  items[_editIndex].progress    = parseInt(document.getElementById('em-progress').value) || 0;
-  items[_editIndex].notes       = document.getElementById('em-notes').value;
-
-  syncProgressStatus(items[_editIndex]);
+  
+  // Extract values from modal
   const updatedItem = items[_editIndex];
+  updatedItem.meetingDate = document.getElementById('em-meetingDate').value;
+  updatedItem.title       = document.getElementById('em-title').value;
+  updatedItem.owner       = document.getElementById('em-owner').value;
+  updatedItem.priority    = document.getElementById('em-priority').value;
+  updatedItem.status      = document.getElementById('em-status').value;
+  updatedItem.dueDate     = document.getElementById('em-dueDate').value;
+  updatedItem.progress    = parseInt(document.getElementById('em-progress').value) || 0;
+  updatedItem.notes       = document.getElementById('em-notes').value;
+
+  // Sync logical coherence between status and progress
+  if (updatedItem.status === 'Completed') updatedItem.progress = 100;
+  else if (updatedItem.progress === 100) updatedItem.status = 'Completed';
+  else if (updatedItem.status === 'Not Started') updatedItem.progress = 0;
+  else if (updatedItem.progress > 0 && updatedItem.progress < 100) updatedItem.status = 'In Progress';
 
   // Send to SheetDB (Update Row by ID)
   if (updatedItem.id) {
@@ -942,43 +977,6 @@ function deleteItem(idx) {
 
   renderCurrentTab();
   showToast('Item deleted');
-}
-
-function quickUpdateStatus(idx, newStatus) {
-  if (!VALID_STATUSES[Object.keys(VALID_STATUSES).find(k => VALID_STATUSES[k] === newStatus)]) return;
-  
-  items[idx].status = newStatus;
-  syncProgressStatus(items[idx]);
-  
-  // Update in SheetDB
-  if(items[idx].id) {
-    fetch(`${SHEETDB_URL}/id/${items[idx].id}`, {
-      method: 'PATCH',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: { status: items[idx].status, progress: items[idx].progress } })
-    });
-  }
-
-  renderCurrentTab();
-  updateSidebarMeta();
-}
-
-function quickUpdateProgress(idx, newProgress) {
-  newProgress = Math.max(0, Math.min(100, parseInt(newProgress) || 0));
-  items[idx].progress = newProgress;
-  syncStatusProgress(items[idx]);
-  
-  // Update in SheetDB
-  if (items[idx].id) {
-    fetch(`${SHEETDB_URL}/id/${items[idx].id}`, {
-      method: 'PATCH',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: { status: items[idx].status, progress: items[idx].progress } })
-    });
-  }
-
-  renderCurrentTab();
-  updateSidebarMeta();
 }
 
 function clearForm() {
@@ -1132,19 +1130,16 @@ function renderAllItems() {
           <span class="${PRIORITY_COLOR[item.priority]||''} px-2.5 py-1 rounded-full text-xs font-semibold">${item.priority}</span>
         </td>
         <td class="p-3 whitespace-nowrap">
-          <select onchange="quickUpdateStatus(${realIdx}, this.value)" class="text-xs border border-gray-300 rounded p-1 outline-none bg-white focus:ring-2 focus:ring-blue-300 w-full min-w-28">
-            <option value="Not Started" ${item.status==='Not Started'?'selected':''}>Not Started</option>
-            <option value="In Progress" ${item.status==='In Progress'?'selected':''}>In Progress</option>
-            <option value="Completed" ${item.status==='Completed'?'selected':''}>Completed</option>
-          </select>
+          ${statusBadge(item.status)}
         </td>
         <td class="p-3 text-gray-400 text-xs whitespace-nowrap">${item.dueDate}</td>
-        <td class="p-3 w-32 flex items-center gap-1">
-          <input type="number" min="0" max="100" value="${item.progress}"
-            onchange="quickUpdateProgress(${realIdx}, this.value)"
-            oninput="this.value = Math.max(0, Math.min(100, parseInt(this.value) || 0))"
-            class="w-14 text-xs border border-gray-300 rounded p-1 outline-none text-center bg-white focus:ring-2 focus:ring-blue-300">
-          <span class="text-gray-400 text-xs font-medium">%</span>
+        <td class="p-3 w-32">
+          <div class="flex items-center gap-2">
+            <div class="w-full bg-gray-200 rounded-full h-1.5 max-w-[50px]">
+               <div class="bg-blue-500 h-1.5 rounded-full" style="width:${item.progress}%"></div>
+            </div>
+            <span class="text-xs font-medium text-gray-600">${item.progress}%</span>
+          </div>
         </td>
         <td class="p-3 text-gray-400 text-xs max-w-[140px] truncate">${item.notes}</td>
         <td class="p-3 whitespace-nowrap">
