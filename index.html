@@ -121,10 +121,9 @@
     .cal-day.has-item{ background: #fefce8; }
     .cal-dot { font-size: 10px; border-radius: 4px; padding: 1px 5px; margin-top: 3px; display: block;
                white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #fff; line-height: 1.6; }
-    .cal-dot.priority-High   { background: #ef4444; }
-    .cal-dot.priority-Medium { background: #f59e0b; }
-    .cal-dot.priority-Low    { background: #10b981; }
-    .cal-dot.priority-done   { background: #6b7280; }
+    .cal-dot.status-Not-Started { background: #6b7280; }
+    .cal-dot.status-In-Progress { background: #f59e0b; }
+    .cal-dot.status-Completed   { background: #10b981; }
 
     /* ── Completion ring ── */
     .ring-wrap { position:relative; width:110px; height:110px; margin:0 auto; }
@@ -258,14 +257,10 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
         <div class="bg-white p-5 rounded-2xl shadow">
           <h2 class="font-semibold text-sm text-gray-600 mb-4">Status Breakdown</h2>
           <canvas id="statusChart"></canvas>
-        </div>
-        <div class="bg-white p-5 rounded-2xl shadow">
-          <h2 class="font-semibold text-sm text-gray-600 mb-4">Priority Split</h2>
-          <canvas id="priorityChart"></canvas>
         </div>
         <div class="bg-white p-5 rounded-2xl shadow flex flex-col items-center justify-center">
           <h2 class="font-semibold text-sm text-gray-600 mb-4 self-start">Completion Rate</h2>
@@ -314,10 +309,6 @@
           <option value="In Progress">In Progress</option>
           <option value="Completed">Completed</option>
         </select>
-        <select id="filterPriority" class="border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-300" onchange="renderAllItems()">
-          <option value="">All Priority</option>
-          <option>High</option><option>Medium</option><option>Low</option>
-        </select>
         <select id="filterOwner" class="border rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-300" onchange="renderAllItems()">
           <option value="">All Owners</option>
         </select>
@@ -331,7 +322,6 @@
               <th class="p-3 cursor-pointer hover:text-gray-800 whitespace-nowrap" onclick="sortBy('meetingDate')">Date <span id="sort-meetingDate"></span></th>
               <th class="p-3 cursor-pointer hover:text-gray-800" onclick="sortBy('title')">Action Item <span id="sort-title"></span></th>
               <th class="p-3 cursor-pointer hover:text-gray-800" onclick="sortBy('owner')">Owner <span id="sort-owner"></span></th>
-              <th class="p-3">Priority</th>
               <th class="p-3">Status</th>
               <th class="p-3 cursor-pointer hover:text-gray-800 whitespace-nowrap" onclick="sortBy('dueDate')">Due Date <span id="sort-dueDate"></span></th>
               <th class="p-3">Progress</th>
@@ -364,12 +354,6 @@
             <input id="f-owner" type="text" placeholder="Assigned person" class="border rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
           </div>
           <div class="flex flex-col gap-1">
-            <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Priority</label>
-            <select id="f-priority" class="border rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
-              <option>High</option><option selected>Medium</option><option>Low</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1">
             <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Status</label>
             <select id="f-status" name="status" required class="border rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
               <option value="Not Started" selected>Not Started</option>
@@ -381,7 +365,7 @@
             <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Due Date</label>
             <input id="f-dueDate" type="date" class="border rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
           </div>
-          <div class="flex flex-col gap-1 md:col-span-2">
+          <div class="flex flex-col gap-1">
             <label class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Progress — <span id="f-progressVal" class="text-blue-600">0%</span></label>
             <input id="f-progress" type="range" min="0" max="100" value="0" class="w-full accent-blue-600"
               oninput="document.getElementById('f-progressVal').innerText=this.value+'%'">
@@ -424,9 +408,8 @@
       </div>
 
       <div class="flex gap-5 mt-4 text-xs text-gray-500">
-        <span><span class="inline-block w-3 h-3 rounded bg-red-400 mr-1 align-middle"></span>High Priority</span>
-        <span><span class="inline-block w-3 h-3 rounded bg-yellow-400 mr-1 align-middle"></span>Medium</span>
-        <span><span class="inline-block w-3 h-3 rounded bg-green-400 mr-1 align-middle"></span>Low / Done</span>
+        <span><span class="inline-block w-3 h-3 rounded bg-yellow-400 mr-1 align-middle"></span>In Progress</span>
+        <span><span class="inline-block w-3 h-3 rounded bg-green-400 mr-1 align-middle"></span>Completed</span>
         <span><span class="inline-block w-2.5 h-2.5 rounded-full border-2 border-blue-500 mr-1 align-middle"></span>Today</span>
       </div>
     </div>
@@ -436,7 +419,7 @@
       <h1 class="text-3xl font-bold mb-1">Reports</h1>
       <p class="text-gray-500 text-sm mb-7">Analytics and performance metrics</p>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         <div class="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl p-5 shadow">
           <p class="text-xs opacity-75 mb-1 font-medium">Avg. Completion</p>
           <p id="rpt-avgProgress" class="text-3xl font-bold">—</p>
@@ -444,10 +427,6 @@
         <div class="bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-2xl p-5 shadow">
           <p class="text-xs opacity-75 mb-1 font-medium">On-time Rate</p>
           <p id="rpt-ontime" class="text-3xl font-bold">—</p>
-        </div>
-        <div class="bg-gradient-to-br from-yellow-500 to-orange-500 text-white rounded-2xl p-5 shadow">
-          <p class="text-xs opacity-75 mb-1 font-medium">High Priority</p>
-          <p id="rpt-highPriority" class="text-3xl font-bold">—</p>
         </div>
         <div class="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-2xl p-5 shadow">
           <p class="text-xs opacity-75 mb-1 font-medium">Unique Owners</p>
@@ -461,8 +440,8 @@
           <canvas id="rptOwnerChart" height="210"></canvas>
         </div>
         <div class="bg-white rounded-2xl shadow p-5">
-          <h2 class="font-semibold text-sm text-gray-600 mb-4">Priority Distribution</h2>
-          <canvas id="rptPriorityChart" height="210"></canvas>
+          <h2 class="font-semibold text-sm text-gray-600 mb-4">Status Distribution</h2>
+          <canvas id="rptStatusChart" height="210"></canvas>
         </div>
       </div>
 
@@ -532,7 +511,7 @@
           </div>
           <div class="bg-gray-50 rounded-xl p-4 text-xs text-gray-500">
             <p class="font-semibold text-gray-600 mb-1">CSV Column Order:</p>
-            <code class="block text-gray-500">meetingDate, title, owner, priority, status, dueDate, progress, notes</code>
+            <code class="block text-gray-500">meetingDate, title, owner, status, dueDate, progress, notes</code>
           </div>
         </div>
       </div>
@@ -562,17 +541,6 @@
       <p class="text-gray-500 text-sm mb-7">Customise dashboard behaviour</p>
 
       <div class="space-y-4">
-        <div class="bg-white rounded-2xl shadow p-5 flex justify-between items-center gap-4">
-          <div>
-            <p class="font-medium text-sm">Default Priority</p>
-            <p class="text-xs text-gray-400 mt-0.5">Pre-fill when adding items</p>
-          </div>
-          <select id="set-priority" class="border rounded-xl px-3 py-2 text-sm outline-none"
-            onchange="saveSetting('defaultPriority', this.value)">
-            <option>High</option><option selected>Medium</option><option>Low</option>
-          </select>
-        </div>
-
         <div class="bg-white rounded-2xl shadow p-5 flex justify-between items-center gap-4">
           <div>
             <p class="font-medium text-sm">Default Status</p>
@@ -613,7 +581,7 @@
             How do I add a new action item?
             <span class="arrow text-blue-500 text-lg leading-none">+</span>
           </summary>
-          <p class="text-sm text-gray-500 mt-3 leading-relaxed">Click <strong>Add New Item</strong> in the sidebar, or press <kbd class="bg-gray-100 border rounded px-1">N</kbd>. Fill in Meeting [...]
+          <p class="text-sm text-gray-500 mt-3 leading-relaxed">Click <strong>Add New Item</strong> in the sidebar, or press <kbd class="bg-gray-100 border rounded px-1">N</kbd>. Fill in Meeting Date, Action Item title, Owner, and optional Due Date and Notes. Status defaults to "Not Started" and Progress to 0%.[...]
         </details>
         <details class="bg-white rounded-2xl shadow p-5">
           <summary class="font-semibold text-sm cursor-pointer flex justify-between items-center">
@@ -627,7 +595,7 @@
             How does the Calendar View work?
             <span class="arrow text-blue-500 text-lg leading-none">+</span>
           </summary>
-          <p class="text-sm text-gray-500 mt-3 leading-relaxed">The Calendar plots items by their <em>due date</em>. Navigate months with Prev / Next. Dots are colour-coded: red = High priority, [...]
+          <p class="text-sm text-gray-500 mt-3 leading-relaxed">The Calendar plots items by their <em>due date</em>. Navigate months with Prev / Next. Dots are colour-coded: yellow = In Progress, green = Completed[...]
         </details>
         <details class="bg-white rounded-2xl shadow p-5">
           <summary class="font-semibold text-sm cursor-pointer flex justify-between items-center">
@@ -658,12 +626,6 @@
         <input id="em-owner" type="text" class="border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-300">
       </div>
       <div class="flex flex-col gap-1">
-        <label class="text-xs text-gray-400">Priority</label>
-        <select id="em-priority" class="border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-300">
-          <option>High</option><option>Medium</option><option>Low</option>
-        </select>
-      </div>
-      <div class="flex flex-col gap-1">
         <label class="text-xs text-gray-400">Status</label>
         <select id="em-status" name="status" required class="border rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
           <option value="Not Started">Not Started</option>
@@ -679,7 +641,7 @@
         <label class="text-xs text-gray-400">Progress %</label>
         <input id="em-progress" type="number" min="0" max="100" class="border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-300">
       </div>
-      <div class="flex flex-col gap-1">
+      <div class="flex flex-col gap-1 md:col-span-2">
         <label class="text-xs text-gray-400">Notes</label>
         <input id="em-notes" type="text" class="border rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-300">
       </div>
@@ -736,7 +698,7 @@ async function loadData() {
 // Store settings locally since the spreadsheet is for tabular action items
 function loadSettings() {
   settings = JSON.parse(localStorage.getItem('dashSettings')) || {
-    defaultPriority: 'Medium', defaultStatus: 'Not Started',
+    defaultStatus: 'Not Started',
     dashName: 'Meeting Actions'
   };
 }
@@ -842,12 +804,6 @@ function updateSidebarMeta() {
     `Last synced ${d.getHours().toString().padStart(2,'0')}:${d.getMinutes().toString().padStart(2,'0')}`;
 }
 
-const PRIORITY_COLOR = {
-  'High'  : 'bg-red-100 text-red-700',
-  'Medium': 'bg-yellow-100 text-yellow-700',
-  'Low'   : 'bg-green-100 text-green-700'
-};
-
 function statusBadge(st) {
   const colors = {
     'Not Started': 'bg-gray-100 text-gray-700',
@@ -877,7 +833,6 @@ function submitFormItem() {
     meetingDate : mDate,
     title       : title,
     owner       : owner,
-    priority    : document.getElementById('f-priority').value,
     status      : document.getElementById('f-status').value,
     dueDate     : document.getElementById('f-dueDate').value,
     progress    : parseInt(document.getElementById('f-progress').value) || 0,
@@ -923,7 +878,6 @@ function openEditModal(idx) {
   document.getElementById('em-meetingDate').value = item.meetingDate || '';
   document.getElementById('em-title').value = item.title || '';
   document.getElementById('em-owner').value = item.owner || '';
-  document.getElementById('em-priority').value = item.priority || 'Medium';
   document.getElementById('em-status').value = item.status || 'Not Started';
   document.getElementById('em-dueDate').value = item.dueDate || '';
   document.getElementById('em-progress').value = item.progress || 0;
@@ -949,7 +903,6 @@ function saveEditItem() {
   updatedItem.meetingDate = document.getElementById('em-meetingDate').value;
   updatedItem.title       = document.getElementById('em-title').value;
   updatedItem.owner       = document.getElementById('em-owner').value;
-  updatedItem.priority    = document.getElementById('em-priority').value;
   updatedItem.status      = document.getElementById('em-status').value;
   updatedItem.dueDate     = document.getElementById('em-dueDate').value;
   updatedItem.progress    = parseInt(document.getElementById('em-progress').value) || 0;
@@ -1007,7 +960,7 @@ function deleteItem(idx) {
         return;
       }
       console.log('✓ Item deleted from SheetDB');
-      showToast('Item deleted');
+      showToast('Item deleted ✓');
     })
     .catch(error => {
       console.error('SheetDB DELETE error:', error);
@@ -1016,146 +969,93 @@ function deleteItem(idx) {
   }
 
   renderCurrentTab();
+  updateSidebarMeta();
 }
 
 function clearForm() {
-  ['f-meetingDate','f-title','f-owner','f-dueDate','f-notes'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-  const todayStr = new Date().toISOString().split('T')[0];
-  document.getElementById('f-meetingDate').value = todayStr;
-  document.getElementById('f-priority').value   = settings.defaultPriority || 'Medium';
-  document.getElementById('f-status').value     = settings.defaultStatus   || 'Not Started';
-  document.getElementById('f-progress').value   = 0;
+  document.getElementById('f-meetingDate').value = '';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-owner').value = '';
+  document.getElementById('f-status').value = settings.defaultStatus || 'Not Started';
+  document.getElementById('f-dueDate').value = '';
+  document.getElementById('f-progress').value = 0;
   document.getElementById('f-progressVal').innerText = '0%';
+  document.getElementById('f-notes').value = '';
 }
 
-// ── DASHBOARD ─────────────────────────────────────────────────────
-function renderDashboard() {
-  const total       = items.length;
-  const completed   = items.filter(i => i.status === 'Completed').length;
-  const inProgress  = items.filter(i => i.status === 'In Progress').length;
-  const notStarted  = items.filter(i => i.status === 'Not Started').length;
-  const avgProgress = total === 0 ? 0 : Math.round(items.reduce((s, i) => s + (parseInt(i.progress) || 0), 0) / total);
-
-  document.getElementById('totalItems').innerText = total;
-  document.getElementById('completedItems').innerText = completed;
-  document.getElementById('progressItems').innerText = inProgress;
-  document.getElementById('pendingItems').innerText = notStarted;
-
-  const pct = total === 0 ? 0 : Math.round((completed / total) * 100);
-  document.getElementById('completionPct').innerText = pct + '%';
-  const offset = 276.5 * (1 - pct / 100);
-  document.getElementById('completionRing').style.strokeDashoffset = offset;
-
-  // Chart: Status breakdown
-  destroyChart('statusChart');
-  const ctxStatus = document.getElementById('statusChart').getContext('2d');
-  charts['statusChart'] = new Chart(ctxStatus, {
-    type: 'doughnut',
-    data: {
-      labels: ['Completed', 'In Progress', 'Not Started'],
-      datasets: [{
-        data: [completed, inProgress, notStarted],
-        backgroundColor: ['#10b981', '#f59e0b', '#ef4444']
-      }]
-    },
-    options: { responsive: true, plugins: { legend: { display: true } } }
-  });
-
-  // Chart: Priority split
-  destroyChart('priorityChart');
-  const highP = items.filter(i => i.priority === 'High').length;
-  const mediumP = items.filter(i => i.priority === 'Medium').length;
-  const lowP = items.filter(i => i.priority === 'Low').length;
-  const ctxPriority = document.getElementById('priorityChart').getContext('2d');
-  charts['priorityChart'] = new Chart(ctxPriority, {
-    type: 'doughnut',
-    data: {
-      labels: ['High', 'Medium', 'Low'],
-      datasets: [{
-        data: [highP, mediumP, lowP],
-        backgroundColor: ['#ef4444', '#f59e0b', '#10b981']
-      }]
-    },
-    options: { responsive: true, plugins: { legend: { display: true } } }
-  });
-
-  // Recent activity
-  const recentActivity = document.getElementById('recentActivity');
-  recentActivity.innerHTML = items.slice(-5).reverse().map(i =>
-    `<li class="text-xs"><strong>${i.title}</strong><br/><span class="text-gray-400">${i.owner} · ${i.status}</span></li>`
-  ).join('');
-
-  // Top owners
-  const ownerMap = {};
-  items.forEach(i => {
-    ownerMap[i.owner] = (ownerMap[i.owner] || 0) + 1;
-  });
-  const topOwners = Object.entries(ownerMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const ownerLeaderboard = document.getElementById('ownerLeaderboard');
-  ownerLeaderboard.innerHTML = topOwners.map(([name, count]) =>
-    `<div class="flex justify-between text-sm"><span>${name}</span><span class="font-semibold text-blue-600">${count} items</span></div>`
-  ).join('');
+function clearFilters() {
+  document.getElementById('allSearchInput').value = '';
+  document.getElementById('filterStatus').value = '';
+  document.getElementById('filterOwner').value = '';
+  renderAllItems();
 }
 
-// ── ALL ITEMS ──────────────────────────────────────────────────────
+// ── TABLE: All Items ───────────────────────────────────────────────
 function renderAllItems() {
-  const searchInput = document.getElementById('allSearchInput').value.toLowerCase();
-  const filterStatus = document.getElementById('filterStatus').value;
-  const filterPriority = document.getElementById('filterPriority').value;
-  const filterOwner = document.getElementById('filterOwner').value;
+  let rows = items.slice();
 
-  let filtered = items.filter(i =>
-    (searchInput === '' || i.title.toLowerCase().includes(searchInput) || i.owner.toLowerCase().includes(searchInput)) &&
-    (filterStatus === '' || i.status === filterStatus) &&
-    (filterPriority === '' || i.priority === filterPriority) &&
-    (filterOwner === '' || i.owner === filterOwner)
+  // Filter
+  const search = document.getElementById('allSearchInput').value.toLowerCase();
+  const fStatus = document.getElementById('filterStatus').value;
+  const fOwner = document.getElementById('filterOwner').value;
+
+  rows = rows.filter(r =>
+    (!search || r.title.toLowerCase().includes(search) || r.owner.toLowerCase().includes(search)) &&
+    (!fStatus || r.status === fStatus) &&
+    (!fOwner || r.owner === fOwner)
   );
 
-  if (sortKey) {
-    filtered.sort((a, b) => {
-      const aVal = a[sortKey] || '';
-      const bVal = b[sortKey] || '';
-      return sortAsc ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
-    });
-  }
+  // Sort
+  rows.sort((a, b) => {
+    let aVal = a[sortKey];
+    let bVal = b[sortKey];
+    if (aVal < bVal) return sortAsc ? -1 : 1;
+    if (aVal > bVal) return sortAsc ? 1 : -1;
+    return 0;
+  });
 
-  document.getElementById('filteredCount').innerText = `Showing ${filtered.length} of ${items.length} items`;
-
-  // Update owner filter
+  // Populate Owner filter
   const owners = [...new Set(items.map(i => i.owner))].sort();
-  const filterOwnerEl = document.getElementById('filterOwner');
-  const selectedOwner = filterOwnerEl.value;
-  filterOwnerEl.innerHTML = '<option value="">All Owners</option>' + owners.map(o => `<option>${o}</option>`).join('');
-  filterOwnerEl.value = selectedOwner;
+  const ownerSel = document.getElementById('filterOwner');
+  const oldVal = ownerSel.value;
+  ownerSel.innerHTML = '<option value="">All Owners</option>';
+  owners.forEach(o => {
+    const opt = document.createElement('option');
+    opt.value = o;
+    opt.textContent = o;
+    ownerSel.appendChild(opt);
+  });
+  ownerSel.value = oldVal;
 
-  const tbody = document.getElementById('allItemsBody');
-  tbody.innerHTML = filtered.map((item, idx) => {
-    const realIdx = items.indexOf(item);
+  // Render
+  const body = document.getElementById('allItemsBody');
+  body.innerHTML = rows.map((r, i) => {
+    const orig_idx = items.indexOf(r);
     return `
-      <tr class="border-b hover:bg-gray-50 transition">
-        <td class="p-3 text-sm">${item.meetingDate || '—'}</td>
-        <td class="p-3 text-sm">${item.title}</td>
-        <td class="p-3 text-sm">${item.owner}</td>
-        <td class="p-3"><span class="px-2 py-1 rounded text-xs font-semibold ${PRIORITY_COLOR[item.priority] || 'bg-gray-100'}">${item.priority}</span></td>
-        <td class="p-3">${statusBadge(item.status)}</td>
-        <td class="p-3 text-sm">${item.dueDate || '—'}</td>
-        <td class="p-3">
-          <div class="w-full bg-gray-200 rounded-full h-2">
-            <div class="bg-blue-500 h-2 rounded-full transition-all" style="width: ${item.progress}%"></div>
-          </div>
-          <span class="text-xs text-gray-500">${item.progress}%</span>
-        </td>
-        <td class="p-3 text-sm text-gray-600">${item.notes || '—'}</td>
-        <td class="p-3 text-sm">
-          <button onclick="openEditModal(${realIdx})" class="text-blue-600 hover:underline mr-2">✏</button>
-          <button onclick="deleteItem(${realIdx})" class="text-red-600 hover:underline">🗑</button>
+      <tr class="border-b hover:bg-blue-50">
+        <td class="p-3 text-xs">${r.meetingDate || '—'}</td>
+        <td class="p-3 text-sm font-medium">${r.title}</td>
+        <td class="p-3 text-sm">${r.owner}</td>
+        <td class="p-3">${statusBadge(r.status)}</td>
+        <td class="p-3 text-xs">${r.dueDate || '—'}</td>
+        <td class="p-3"><div class="w-16 bg-gray-200 rounded h-2"><div class="bg-blue-500 h-2 rounded" style="width:${r.progress}%"></div></div></td>
+        <td class="p-3 text-xs text-gray-400">${r.notes || '—'}</td>
+        <td class="p-3 text-xs flex gap-1">
+          <button onclick="openEditModal(${orig_idx})" class="text-blue-600 hover:underline">Edit</button>
+          <button onclick="deleteItem(${orig_idx})" class="text-red-600 hover:underline">Delete</button>
         </td>
       </tr>
     `;
   }).join('');
+
+  document.getElementById('filteredCount').innerText = `Showing ${rows.length} of ${items.length} items`;
+
+  // Update sort indicators
+  document.querySelectorAll('[id^="sort-"]').forEach(el => el.innerText = '');
+  if (sortKey) {
+    const indicator = document.getElementById('sort-' + sortKey);
+    if (indicator) indicator.innerText = sortAsc ? '↑' : '↓';
+  }
 }
 
 function sortBy(key) {
@@ -1163,320 +1063,348 @@ function sortBy(key) {
     sortAsc = !sortAsc;
   } else {
     sortKey = key;
-    sortAsc = true;
+    sortAsc = false;
   }
-  ['meetingDate', 'title', 'owner', 'dueDate'].forEach(k => {
-    const el = document.getElementById('sort-' + k);
-    if (el) el.innerText = (sortKey === k) ? (sortAsc ? '↑' : '↓') : '';
-  });
   renderAllItems();
 }
 
-function clearFilters() {
-  document.getElementById('allSearchInput').value = '';
-  document.getElementById('filterStatus').value = '';
-  document.getElementById('filterPriority').value = '';
-  document.getElementById('filterOwner').value = '';
-  renderAllItems();
+// ── DASHBOARD ──────────────────────────────────────────────────────
+function renderDashboard() {
+  const total = items.length;
+  const pending = items.filter(i => i.status === 'Not Started').length;
+  const inProgress = items.filter(i => i.status === 'In Progress').length;
+  const completed = items.filter(i => i.status === 'Completed').length;
+  const avgProgress = total > 0 ? Math.round(items.reduce((s, i) => s + (parseInt(i.progress) || 0), 0) / total) : 0;
+
+  document.getElementById('totalItems').innerText = total;
+  document.getElementById('pendingItems').innerText = pending;
+  document.getElementById('progressItems').innerText = inProgress;
+  document.getElementById('completedItems').innerText = completed;
+  document.getElementById('completionPct').innerText = avgProgress + '%';
+
+  // Completion ring
+  const circumference = 2 * Math.PI * 44;
+  const offset = circumference * (1 - avgProgress / 100);
+  document.getElementById('completionRing').style.strokeDashoffset = offset;
+
+  // Status chart
+  destroyChart('statusChart');
+  const statusCtx = document.getElementById('statusChart').getContext('2d');
+  charts['statusChart'] = new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Not Started', 'In Progress', 'Completed'],
+      datasets: [{
+        data: [pending, inProgress, completed],
+        backgroundColor: ['#d1d5db', '#fbbf24', '#10b981'],
+        borderColor: '#fff'
+      }]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+  });
+
+  // Recent activity
+  const recent = items.slice().sort((a, b) => new Date(b.meetingDate) - new Date(a.meetingDate)).slice(0, 5);
+  document.getElementById('recentActivity').innerHTML = recent.map(r =>
+    `<li class="flex justify-between items-center text-xs">
+      <span><strong>${r.title}</strong> — ${r.owner}</span>
+      <span class="text-gray-400">${r.meetingDate}</span>
+    </li>`
+  ).join('');
+
+  // Owner leaderboard
+  const ownerStats = {};
+  items.forEach(i => {
+    if (!ownerStats[i.owner]) ownerStats[i.owner] = { total: 0, done: 0 };
+    ownerStats[i.owner].total++;
+    if (i.status === 'Completed') ownerStats[i.owner].done++;
+  });
+  const leaderboard = Object.entries(ownerStats)
+    .sort((a, b) => (b[1].done / b[1].total) - (a[1].done / a[1].total))
+    .slice(0, 5);
+  document.getElementById('ownerLeaderboard').innerHTML = leaderboard.map(([owner, stats]) =>
+    `<div class="flex justify-between items-center text-sm">
+      <span>${owner}</span>
+      <span class="text-green-600 font-semibold">${stats.done}/${stats.total}</span>
+    </div>`
+  ).join('');
 }
 
 // ── CALENDAR ───────────────────────────────────────────────────────
 function renderCalendar() {
-  const now = new Date(calYear, calMonth, 1);
-  const startDay = now.getDay();
+  document.getElementById('calMonthLabel').innerText =
+    new Date(calYear, calMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
   const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-  const daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
+  let html = '';
 
-  document.getElementById('calMonthLabel').innerText = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  // Empty cells
+  for (let i = 0; i < firstDay; i++) html += '<div class="cal-day"></div>';
 
-  const calGrid = document.getElementById('calGrid');
-  calGrid.innerHTML = '';
+  // Days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayItems = items.filter(i => i.dueDate === dateStr);
+    const isToday = dateStr === today.toISOString().split('T')[0];
 
-  // Previous month
-  for (let i = startDay - 1; i >= 0; i--) {
-    const day = daysInPrevMonth - i;
-    const div = document.createElement('div');
-    div.className = 'cal-day opacity-50';
-    div.innerText = day;
-    calGrid.appendChild(div);
+    html += `<div class="cal-day ${isToday ? 'today' : ''} ${dayItems.length ? 'has-item' : ''}">
+      <div class="text-xs font-semibold text-gray-700">${d}</div>
+      ${dayItems.map(i => `<div class="cal-dot status-${i.status.replace(' ', '-')}">${i.title.substring(0,10)}</div>`).join('')}
+    </div>`;
   }
 
-  // Current month
-  const today = new Date();
-  for (let day = 1; day <= daysInMonth; day++) {
-    const div = document.createElement('div');
-    div.className = 'cal-day';
-    div.innerHTML = `<strong>${day}</strong>`;
-
-    if (calYear === today.getFullYear() && calMonth === today.getMonth() && day === today.getDate()) {
-      div.classList.add('today');
-    }
-
-    const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    const itemsOnDay = items.filter(i => i.dueDate === dateStr);
-
-    if (itemsOnDay.length > 0) {
-      div.classList.add('has-item');
-      itemsOnDay.forEach(item => {
-        const dot = document.createElement('span');
-        dot.className = `cal-dot priority-${item.priority || 'Low'}`;
-        dot.innerText = item.title.substring(0, 12);
-        div.appendChild(dot);
-      });
-    }
-
-    calGrid.appendChild(div);
-  }
-
-  // Next month
-  const totalCells = calGrid.children.length;
-  for (let i = 1; i <= 42 - totalCells; i++) {
-    const div = document.createElement('div');
-    div.className = 'cal-day opacity-50';
-    div.innerText = i;
-    calGrid.appendChild(div);
-  }
+  document.getElementById('calGrid').innerHTML = html;
 }
 
 function prevMonth() {
-  if (calMonth === 0) {
-    calMonth = 11;
-    calYear--;
-  } else {
-    calMonth--;
-  }
+  if (calMonth === 0) { calYear--; calMonth = 11; }
+  else calMonth--;
   renderCalendar();
 }
 
 function nextMonth() {
-  if (calMonth === 11) {
-    calMonth = 0;
-    calYear++;
-  } else {
-    calMonth++;
-  }
+  if (calMonth === 11) { calYear++; calMonth = 0; }
+  else calMonth++;
   renderCalendar();
 }
 
-// ── REPORTS ────────────────────────────────────────────────────────
+// ── REPORTS ───────────────────────────────────────────────────────
 function renderReports() {
   const total = items.length;
   const completed = items.filter(i => i.status === 'Completed').length;
-  const avgProgress = total === 0 ? 0 : Math.round(items.reduce((s, i) => s + (parseInt(i.progress) || 0), 0) / total);
+  const avgProgress = total > 0 ? Math.round(items.reduce((s, i) => s + (parseInt(i.progress) || 0), 0) / total) : 0;
+
+  // On-time: completed items with dueDate <= today
+  const onTimeCount = items.filter(i =>
+    i.status === 'Completed' && i.dueDate && new Date(i.dueDate) <= today
+  ).length;
+  const onTimeRate = completed > 0 ? Math.round((onTimeCount / completed) * 100) : 0;
 
   document.getElementById('rpt-avgProgress').innerText = avgProgress + '%';
-
-  const now = new Date();
-  const onTime = items.filter(i => {
-    if (!i.dueDate || i.status !== 'Completed') return false;
-    return new Date(i.dueDate) >= now;
-  }).length;
-  const onTimeRate = completed === 0 ? '—' : Math.round((onTime / completed) * 100) + '%';
-  document.getElementById('rpt-ontime').innerText = onTimeRate;
-
-  const highPriority = items.filter(i => i.priority === 'High').length;
-  document.getElementById('rpt-highPriority').innerText = highPriority;
-
-  const owners = [...new Set(items.map(i => i.owner))].length;
-  document.getElementById('rpt-owners').innerText = owners;
+  document.getElementById('rpt-ontime').innerText = onTimeRate + '%';
+  document.getElementById('rpt-owners').innerText = new Set(items.map(i => i.owner)).size;
 
   // Owner chart
-  destroyChart('rptOwnerChart');
-  const ownerCounts = {};
+  const ownerMap = {};
   items.forEach(i => {
-    ownerCounts[i.owner] = (ownerCounts[i.owner] || 0) + 1;
+    if (!ownerMap[i.owner]) ownerMap[i.owner] = 0;
+    ownerMap[i.owner]++;
   });
-  const ctxOwner = document.getElementById('rptOwnerChart').getContext('2d');
-  charts['rptOwnerChart'] = new Chart(ctxOwner, {
+  destroyChart('rptOwnerChart');
+  const ownerCtx = document.getElementById('rptOwnerChart').getContext('2d');
+  charts['rptOwnerChart'] = new Chart(ownerCtx, {
     type: 'bar',
     data: {
-      labels: Object.keys(ownerCounts),
+      labels: Object.keys(ownerMap),
       datasets: [{
-        label: 'Items',
-        data: Object.values(ownerCounts),
-        backgroundColor: '#2563eb'
+        label: 'Items Assigned',
+        data: Object.values(ownerMap),
+        backgroundColor: '#3b82f6',
+        borderRadius: 6
       }]
     },
     options: { responsive: true, indexAxis: 'y' }
   });
 
-  // Priority chart
-  destroyChart('rptPriorityChart');
-  const highC = items.filter(i => i.priority === 'High').length;
-  const medC = items.filter(i => i.priority === 'Medium').length;
-  const lowC = items.filter(i => i.priority === 'Low').length;
-  const ctxPriority = document.getElementById('rptPriorityChart').getContext('2d');
-  charts['rptPriorityChart'] = new Chart(ctxPriority, {
-    type: 'bar',
+  // Status chart
+  const statusMap = { 'Not Started': 0, 'In Progress': 0, 'Completed': 0 };
+  items.forEach(i => statusMap[i.status]++);
+  destroyChart('rptStatusChart');
+  const statusCtx = document.getElementById('rptStatusChart').getContext('2d');
+  charts['rptStatusChart'] = new Chart(statusCtx, {
+    type: 'pie',
     data: {
-      labels: ['High', 'Medium', 'Low'],
+      labels: ['Not Started', 'In Progress', 'Completed'],
       datasets: [{
-        label: 'Count',
-        data: [highC, medC, lowC],
-        backgroundColor: ['#ef4444', '#f59e0b', '#10b981']
+        data: [statusMap['Not Started'], statusMap['In Progress'], statusMap['Completed']],
+        backgroundColor: ['#d1d5db', '#fbbf24', '#10b981'],
+        borderColor: '#fff'
       }]
     },
-    options: { responsive: true }
+    options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
   });
 
-  // Owner performance table
-  const perfTable = document.getElementById('rptOwnerTable');
-  const perfData = Object.entries(ownerCounts).map(([owner, total]) => {
-    const ownerItems = items.filter(i => i.owner === owner);
-    const done = ownerItems.filter(i => i.status === 'Completed').length;
-    const inProg = ownerItems.filter(i => i.status === 'In Progress').length;
-    const avgProg = ownerItems.reduce((s, i) => s + (parseInt(i.progress) || 0), 0) / total;
-    return { owner, total, done, inProg, avgProg: Math.round(avgProg) };
-  }).sort((a, b) => b.done - a.done);
+  // Owner table
+  const ownerStats = {};
+  items.forEach(i => {
+    if (!ownerStats[i.owner]) ownerStats[i.owner] = { total: 0, done: 0, inProg: 0, avgProg: 0 };
+    ownerStats[i.owner].total++;
+    if (i.status === 'Completed') ownerStats[i.owner].done++;
+    if (i.status === 'In Progress') ownerStats[i.owner].inProg++;
+    ownerStats[i.owner].avgProg += parseInt(i.progress) || 0;
+  });
+  Object.keys(ownerStats).forEach(o => {
+    ownerStats[o].avgProg = Math.round(ownerStats[o].avgProg / ownerStats[o].total);
+  });
 
-  perfTable.innerHTML = perfData.map(row => `
-    <tr class="border-b">
-      <td class="p-3 text-sm">${row.owner}</td>
-      <td class="p-3 text-sm font-semibold">${row.total}</td>
-      <td class="p-3 text-sm text-green-600 font-semibold">${row.done}</td>
-      <td class="p-3 text-sm text-yellow-600 font-semibold">${row.inProg}</td>
-      <td class="p-3 text-sm">${row.avgProg}%</td>
-    </tr>
-  `).join('');
+  const tbody = document.getElementById('rptOwnerTable');
+  tbody.innerHTML = Object.entries(ownerStats).map(([owner, stats]) =>
+    `<tr class="border-b text-sm">
+      <td class="p-3">${owner}</td>
+      <td class="p-3">${stats.total}</td>
+      <td class="p-3 text-green-600">${stats.done}</td>
+      <td class="p-3 text-yellow-600">${stats.inProg}</td>
+      <td class="p-3">${stats.avgProg}%</td>
+    </tr>`
+  ).join('');
 }
 
-// ── EXPORT/IMPORT ──────────────────────────────────────────────────
+// ── EXPORT / IMPORT ────────────────────────────────────────────────
 function renderExportTab() {
-  const total = items.length;
-  const owners = [...new Set(items.map(i => i.owner))].length;
-  const approxSize = (JSON.stringify(items).length / 1024).toFixed(1) + ' KB';
-
-  document.getElementById('exp-total').innerText = total;
-  document.getElementById('exp-owners').innerText = owners;
-  document.getElementById('exp-size').innerText = approxSize;
+  document.getElementById('exp-total').innerText = items.length;
+  document.getElementById('exp-owners').innerText = new Set(items.map(i => i.owner)).size;
+  const size = new Blob([JSON.stringify(items)]).size;
+  document.getElementById('exp-size').innerText = (size / 1024).toFixed(1) + ' KB';
 }
 
 function exportCSV() {
-  if (items.length === 0) {
-    showToast('No items to export');
-    return;
-  }
-  const headers = ['meetingDate', 'title', 'owner', 'priority', 'status', 'dueDate', 'progress', 'notes'];
-  const rows = items.map(i => headers.map(h => `"${(i[h] || '').toString().replace(/"/g, '""')}"`).join(','));
-  const csv = [headers.join(','), ...rows].join('\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  if (!items.length) { showToast('⚠ No items to export'); return; }
+  const headers = ['meetingDate', 'title', 'owner', 'status', 'dueDate', 'progress', 'notes'];
+  const rows = [headers.join(',')];
+  items.forEach(i => {
+    rows.push([
+      i.meetingDate || '',
+      `"${(i.title || '').replace(/"/g, '""')}"`,
+      i.owner || '',
+      i.status || '',
+      i.dueDate || '',
+      i.progress || 0,
+      `"${(i.notes || '').replace(/"/g, '""')}"`
+    ].join(','));
+  });
+  const csv = rows.join('\n');
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
+  link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
   link.download = 'tracker_export.csv';
   link.click();
   showToast('CSV exported ✓');
 }
 
 function exportJSON() {
-  if (items.length === 0) {
-    showToast('No items to export');
-    return;
-  }
-  const blob = new Blob([JSON.stringify(items, null, 2)], { type: 'application/json;charset=utf-8;' });
+  if (!items.length) { showToast('⚠ No items to export'); return; }
+  const json = JSON.stringify(items, null, 2);
   const link = document.createElement('a');
-  link.href = URL.createObjectURL(blob);
+  link.href = 'data:application/json;charset=utf-8,' + encodeURIComponent(json);
   link.download = 'tracker_export.json';
   link.click();
   showToast('JSON exported ✓');
 }
 
-function handleImport(event) {
-  const file = event.target.files[0];
+function handleDrop(e) {
+  e.preventDefault();
+  const files = e.dataTransfer.files;
+  if (files.length) handleImport({ target: { files } });
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
   if (!file) return;
-
   const reader = new FileReader();
-  reader.onload = e => {
+  reader.onload = (evt) => {
     try {
-      const content = e.target.result;
       let imported = [];
-
-      if (file.name.endsWith('.csv')) {
-        const lines = content.split('\n').filter(l => l.trim());
-        const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
-        imported = lines.slice(1).map(line => {
-          const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+      if (file.name.endsWith('.json')) {
+        imported = JSON.parse(evt.target.result);
+      } else if (file.name.endsWith('.csv')) {
+        const lines = evt.target.result.split('\n');
+        const headers = lines[0].split(',');
+        for (let i = 1; i < lines.length; i++) {
+          if (!lines[i].trim()) continue;
+          const values = lines[i].split(',');
           const obj = {};
-          headers.forEach((h, i) => obj[h] = values[i] || '');
-          return obj;
-        });
-      } else if (file.name.endsWith('.json')) {
-        imported = JSON.parse(content);
+          headers.forEach((h, idx) => obj[h.trim()] = values[idx] ? values[idx].trim().replace(/^"|"$/g, '') : '');
+          imported.push(obj);
+        }
       }
-
-      imported.forEach(item => {
-        if (!item.id) item.id = 'ID_' + Date.now() + Math.random();
-        items.push(item);
-      });
-
+      if (!Array.isArray(imported)) { showToast('⚠ Invalid format'); return; }
+      items = items.concat(imported);
       renderAll();
       showToast(`Imported ${imported.length} items ✓`);
-    } catch (error) {
-      showToast('⚠ Import error: ' + error.message);
+    } catch (err) {
+      showToast('⚠ Error parsing file: ' + err.message);
     }
   };
   reader.readAsText(file);
 }
 
-function handleDrop(event) {
-  event.preventDefault();
-  const file = event.dataTransfer.files[0];
-  if (file) {
-    document.getElementById('importFile').files = event.dataTransfer.files;
-    handleImport({ target: { files: event.dataTransfer.files } });
+// ── SETTINGS ───────────────────────────────────────────────────────
+function applySettingsUI() {
+  document.getElementById('set-status').value = settings.defaultStatus || 'Not Started';
+  document.getElementById('set-dashName').value = settings.dashName || 'Meeting Actions';
+}
+
+// ── LOGIN / LOGOUT ─────────────────────────────────────────────────
+function doLogin() {
+  const user = document.getElementById('loginUser').value;
+  const pass = document.getElementById('loginPass').value;
+  
+  if (!user || !pass) {
+    showLoginError();
+    return;
+  }
+
+  // Simple demo: accept any non-empty credentials
+  localStorage.setItem('authUser', user);
+  showLoginScreen(false);
+  loadSettings();
+  clearForm();
+  loadData().then(() => renderAll());
+}
+
+function doLogout() {
+  localStorage.removeItem('authUser');
+  showLoginScreen(true);
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+function showLoginScreen(show) {
+  const loginScreen = document.getElementById('loginScreen');
+  const appWrapper = document.getElementById('appWrapper');
+  
+  if (show) {
+    loginScreen.classList.remove('hidden');
+    appWrapper.classList.remove('visible');
+  } else {
+    loginScreen.classList.add('hidden');
+    appWrapper.classList.add('visible');
   }
 }
 
-// ── LOGIN/LOGOUT ───────────────────────────────────────────────────
+function showLoginError() {
+  const card = document.getElementById('loginCard');
+  const error = document.getElementById('loginError');
+  error.classList.remove('hidden');
+  card.classList.add('shake');
+  setTimeout(() => card.classList.remove('shake'), 400);
+  setTimeout(() => error.classList.add('hidden'), 3000);
+}
+
 function togglePassVisibility() {
   const pass = document.getElementById('loginPass');
   const eye = document.getElementById('eyeBtn');
   if (pass.type === 'password') {
     pass.type = 'text';
-    eye.innerText = '🙈';
+    eye.innerText = '👁‍🗨';
   } else {
     pass.type = 'password';
     eye.innerText = '👁';
   }
 }
 
-function doLogin() {
-  const user = document.getElementById('loginUser').value.trim();
-  const pass = document.getElementById('loginPass').value.trim();
-  
-  // Simple mock auth (replace with real auth as needed)
-  if (user && pass) {
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('appWrapper').classList.add('visible');
-    loadSettings();
-    loadData();
-    renderAll();
-  } else {
-    const card = document.getElementById('loginCard');
-    card.classList.add('shake');
-    document.getElementById('loginError').classList.remove('hidden');
-    setTimeout(() => card.classList.remove('shake'), 400);
-  }
-}
-
-function doLogout() {
-  document.getElementById('loginScreen').classList.remove('hidden');
-  document.getElementById('appWrapper').classList.remove('visible');
-  document.getElementById('loginUser').value = '';
-  document.getElementById('loginPass').value = '';
-  document.getElementById('loginError').classList.add('hidden');
-}
-
-function applySettingsUI() {
-  document.getElementById('set-priority').value = settings.defaultPriority || 'Medium';
-  document.getElementById('set-status').value = settings.defaultStatus || 'Not Started';
-  document.getElementById('set-dashName').value = settings.dashName || 'Meeting Actions';
-}
-
-// Initialize on load
+// ── INIT ───────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
-  loadSettings();
+  const authUser = localStorage.getItem('authUser');
+  if (authUser) {
+    showLoginScreen(false);
+    loadSettings();
+    clearForm();
+    loadData().then(() => renderAll());
+  } else {
+    showLoginScreen(true);
+  }
 });
 </script>
-
 </body>
 </html>
