@@ -137,6 +137,9 @@
              opacity:0; transform:translateY(12px); transition:all .28s ease; pointer-events:none; }
     #toast.show { opacity:1; transform:none; }
 
+    /* ── Spin animation for sync icon ── */
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width:6px; height:6px; }
     ::-webkit-scrollbar-track { background:transparent; }
@@ -296,7 +299,24 @@
           <h1 class="text-3xl font-bold">All Action Items</h1>
           <p class="text-gray-500 text-sm mt-0.5" id="filteredCount">Showing all items</p>
         </div>
-        <button onclick="switchTab('add-item')" class="bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 text-sm font-medium">+ Add Item</button>
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="syncAllToSheet()" id="syncAllBtn"
+            class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 rounded-xl text-sm font-medium transition">
+            <span id="syncAllIcon">↻</span> Sync All to Sheet
+          </button>
+          <button onclick="switchTab('add-item')" class="bg-blue-600 text-white px-5 py-2 rounded-xl hover:bg-blue-700 text-sm font-medium">+ Add Item</button>
+        </div>
+      </div>
+
+      <!-- Sync progress bar (hidden by default) -->
+      <div id="syncProgressWrap" class="hidden mb-4 bg-white rounded-2xl shadow p-4">
+        <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
+          <span id="syncProgressLabel">Syncing…</span>
+          <span id="syncProgressPct">0%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+          <div id="syncProgressBar" class="bg-emerald-500 h-2.5 rounded-full transition-all duration-300" style="width:0%"></div>
+        </div>
       </div>
 
       <div class="bg-white rounded-2xl shadow p-4 mb-5 flex flex-wrap gap-3 items-center">
@@ -1062,8 +1082,9 @@ function renderAllItems() {
         <td class="p-3 text-xs">${r.dueDate || '—'}</td>
         <td class="p-3"><div class="w-16 bg-gray-200 rounded h-2"><div class="bg-blue-500 h-2 rounded" style="width:${r.progress}%"></div></div></td>
         <td class="p-3 text-xs text-gray-400">${r.notes || '—'}</td>
-        <td class="p-3 text-xs flex gap-1">
+        <td class="p-3 text-xs flex gap-1 items-center">
           <button onclick="openEditModal(${orig_idx})" class="text-blue-600 hover:underline">Edit</button>
+          <button onclick="syncItemToSheet(${orig_idx})" class="text-emerald-600 hover:underline" title="Push this item to the sheet">Sync</button>
           <button onclick="deleteItem(${orig_idx})" class="text-red-600 hover:underline">Delete</button>
         </td>
       </tr>
@@ -1272,7 +1293,114 @@ function renderReports() {
   ).join('');
 }
 
-// ── EXPORT / IMPORT ────────────────────────────────────────────────
+// ── SYNC OPERATIONS ───────────────────────────────────────────────
+
+// Helper: update the sync progress bar UI
+function setSyncProgress(done, total, label) {
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+  document.getElementById('syncProgressBar').style.width = pct + '%';
+  document.getElementById('syncProgressPct').innerText = pct + '%';
+  if (label) document.getElementById('syncProgressLabel').innerText = label;
+}
+
+// Sync ALL dashboard items → wipe sheet then re-insert everything
+async function syncAllToSheet() {
+  if (!items.length) { showToast('⚠ No items to sync'); return; }
+
+  const btn = document.getElementById('syncAllBtn');
+  const icon = document.getElementById('syncAllIcon');
+  const wrap = document.getElementById('syncProgressWrap');
+
+  // Lock button
+  btn.disabled = true;
+  btn.classList.add('opacity-60', 'cursor-not-allowed');
+  icon.style.display = 'inline-block';
+  icon.style.animation = 'spin 1s linear infinite';
+
+  wrap.classList.remove('hidden');
+  setSyncProgress(0, 1, 'Clearing existing sheet data…');
+
+  try {
+    // Step 1: Delete all rows from the sheet
+    const delRes = await fetch(`${SHEETDB_URL}/all`, {
+      method: 'DELETE',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
+    });
+    if (!delRes.ok) throw new Error(`Clear failed (${delRes.status})`);
+
+    setSyncProgress(0, items.length, `Writing ${items.length} items…`);
+
+    // Step 2: Re-insert all items in batches of 20
+    const BATCH = 20;
+    let done = 0;
+    for (let i = 0; i < items.length; i += BATCH) {
+      const batch = items.slice(i, i + BATCH).map(item => ({
+        ...item,
+        id: item.id || ('ID_' + Date.now() + '_' + i)
+      }));
+      const postRes = await fetch(SHEETDB_URL, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: batch })
+      });
+      if (!postRes.ok) throw new Error(`Write batch failed (${postRes.status})`);
+      done += batch.length;
+      setSyncProgress(done, items.length, `Written ${done} of ${items.length} items…`);
+    }
+
+    setSyncProgress(items.length, items.length, '✓ Sync complete!');
+    showToast(`✓ All ${items.length} items synced to sheet`);
+    setTimeout(() => wrap.classList.add('hidden'), 2800);
+
+  } catch (err) {
+    console.error('Sync error:', err);
+    document.getElementById('syncProgressBar').classList.replace('bg-emerald-500', 'bg-red-500');
+    setSyncProgress(0, 1, '⚠ Sync failed: ' + err.message);
+    showToast('⚠ Sync failed: ' + err.message);
+    setTimeout(() => {
+      wrap.classList.add('hidden');
+      document.getElementById('syncProgressBar').classList.replace('bg-red-500', 'bg-emerald-500');
+    }, 3500);
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('opacity-60', 'cursor-not-allowed');
+    icon.style.animation = '';
+  }
+}
+
+// Sync a SINGLE item row → PATCH if id exists, else POST as new row
+async function syncItemToSheet(idx) {
+  const item = items[idx];
+  if (!item) return;
+
+  showToast('Syncing item…');
+  try {
+    let res;
+    if (item.id) {
+      // Update existing row by id column
+      res = await fetch(`${SHEETDB_URL}/id/${encodeURIComponent(item.id)}`, {
+        method: 'PATCH',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: item })
+      });
+    } else {
+      // No id — assign one and insert as a new row
+      item.id = 'ID_' + Date.now();
+      res = await fetch(SHEETDB_URL, {
+        method: 'POST',
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: [item] })
+      });
+    }
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    showToast(`✓ "${item.title}" synced to sheet`);
+  } catch (err) {
+    console.error('Row sync error:', err);
+    showToast('⚠ Row sync failed: ' + err.message);
+  }
+}
+
+
 function renderExportTab() {
   document.getElementById('exp-total').innerText = items.length;
   document.getElementById('exp-owners').innerText = new Set(items.map(i => i.owner)).size;
