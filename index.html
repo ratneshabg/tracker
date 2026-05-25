@@ -1810,7 +1810,13 @@ function processImportFile(file) {
 }
 
 // ── SYNC TO SHEET ─────────────────────────────────────────────────
+// ── SYNC TO SHEET ─────────────────────────────────────────────────
 async function syncAllToSheet() {
+  if (items.length === 0) {
+    showToast('No items to sync');
+    return;
+  }
+
   const btn = document.getElementById('syncAllBtn');
   const icon = document.getElementById('syncAllIcon');
   const progressWrap = document.getElementById('syncProgressWrap');
@@ -1822,6 +1828,8 @@ async function syncAllToSheet() {
   icon.classList.add('spinning');
   progressWrap.classList.remove('hidden');
   
+  let successCount = 0;
+  
   try {
     for (let i = 0; i < items.length; i++) {
       const pct = Math.round(((i + 1) / items.length) * 100);
@@ -1829,19 +1837,25 @@ async function syncAllToSheet() {
       progressPct.innerText = pct + '%';
       progressLabel.innerText = `Syncing item ${i + 1} of ${items.length}…`;
       
-      await fetch(SHEETDB_URL + '/id/' + i, {
+      const currentItem = items[i];
+      
+      // Update each row by matching its specific title column text
+      const response = await fetch(`${SHEETDB_URL}/title/${encodeURIComponent(currentItem.title)}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: items[i] })
+        body: JSON.stringify({ data: currentItem })
       });
       
-      await new Promise(resolve => setTimeout(resolve, 100));
+      if (response.ok) successCount++;
+      
+      // Short delay to maintain API rate-limit stability
+      await new Promise(resolve => setTimeout(resolve, 150));
     }
     
-    showToast('All items synced to sheet ✓');
+    showToast(`Successfully synced ${successCount} items to sheet ✓`);
   } catch (error) {
     console.error('Sync error:', error);
-    showToast('⚠ Sync failed: ' + error.message);
+    showToast('⚠ Sync encountered errors: ' + error.message);
   } finally {
     btn.disabled = false;
     icon.classList.remove('spinning');
