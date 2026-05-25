@@ -46,6 +46,7 @@
       width: 100%; max-width: 440px;
       box-shadow: 0 32px 80px rgba(0,0,0,0.5);
       animation: cardIn .5s cubic-bezier(.22,1,.36,1) both;
+      margin: 0 16px;
     }
     @keyframes cardIn {
       from { opacity:0; transform:translateY(28px) scale(.97); }
@@ -101,6 +102,63 @@
     #appWrapper { display: none; }
     #appWrapper.visible { display: flex; }
 
+    /* ── Mobile Menu ── */
+    #mobileMenuBtn {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 100;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: white;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(37,99,235,0.3);
+    }
+
+    #mobileMenu {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      height: 100vh;
+      background: linear-gradient(to bottom, #0f172a, #1e293b);
+      z-index: 200;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+      box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+    }
+
+    #mobileMenu.open {
+      transform: translateX(0);
+    }
+
+    #mobileOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 150;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #mobileOverlay.show {
+      opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+      #mobileMenuBtn { display: flex; align-items: center; justify-content: center; }
+      #mobileMenu { display: block; }
+      #mobileOverlay { display: block; }
+    }
+
     /* ── Tab nav states ── */
     .nav-link { color: rgba(255,255,255,0.7); transition: all 0.2s ease; }
     .nav-link:hover { background: rgba(255,255,255,0.1); color: #fff; }
@@ -116,7 +174,7 @@
 
     /* ── Calendar grid ── */
     .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 6px; }
-    .cal-day  { min-height: 90px; border-radius: 12px; padding: 8px; background: #ffffff; border: 2px solid #f1f5f9; transition: all 0.2s ease; }
+    .cal-day  { min-height: 90px; border-radius: 12px; padding: 8px; background: #ffffff; border: 2px solid #f1f5f9; transition: all 0.2s ease; cursor: pointer; }
     .cal-day:hover { border-color: #cbd5e1; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
     .cal-day.today   { border: 2px solid #2563eb; background: #eff6ff; box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
     .cal-day.has-item{ background: #fefce8; border-color: #fde047; }
@@ -125,6 +183,11 @@
     .cal-dot.status-Not-Started { background: #64748b; }
     .cal-dot.status-In-Progress { background: #f59e0b; }
     .cal-dot.status-Completed   { background: #10b981; }
+
+    @media (max-width: 640px) {
+      .cal-day { min-height: 60px; padding: 4px; font-size: 12px; }
+      .cal-dot { font-size: 8px; padding: 1px 4px; }
+    }
 
     /* ── Completion ring ── */
     .ring-wrap { position:relative; width:120px; height:120px; margin:0 auto; }
@@ -136,11 +199,16 @@
     #toast { position:fixed; bottom:28px; right:28px; background:#1e293b; color:#fff;
              padding:14px 24px; border-radius:16px; font-size:14px; z-index:9999;
              opacity:0; transform:translateY(12px); transition:all .28s ease; pointer-events:none;
-             box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+             box-shadow: 0 8px 24px rgba(0,0,0,0.3); max-width: 90%; }
     #toast.show { opacity:1; transform:none; }
+
+    @media (max-width: 640px) {
+      #toast { bottom: 16px; right: 16px; left: 16px; text-align: center; }
+    }
 
     /* ── Spin animation for sync icon ── */
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .spinning { animation: spin 1s linear infinite; }
 
     /* ── Scrollbar ── */
     ::-webkit-scrollbar { width:8px; height:8px; }
@@ -277,6 +345,21 @@
       line-height: 1.6;
     }
 
+    @media (max-width: 640px) {
+      .mom-access-card {
+        padding: 32px 24px;
+      }
+      .mom-icon {
+        font-size: 56px;
+      }
+      .mom-access-card h2 {
+        font-size: 22px;
+      }
+      .info-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
     /* Enhanced stat cards */
     .stat-card {
       background: white;
@@ -328,9 +411,23 @@
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(37,99,235,0.15);
     }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      main { padding-top: 70px !important; }
+      .stat-card { padding: 16px; }
+      table { font-size: 12px; }
+      table th, table td { padding: 8px 6px; }
+    }
   </style>
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
+
+<!-- Mobile Menu Button -->
+<button id="mobileMenuBtn" onclick="toggleMobileMenu()">☰</button>
+
+<!-- Mobile Overlay -->
+<div id="mobileOverlay" onclick="toggleMobileMenu()"></div>
 
 <div id="loginScreen">
   <div class="blob blob-1"></div>
@@ -379,6 +476,38 @@
 
 <div id="appWrapper" class="flex min-h-screen">
 
+  <!-- Mobile Menu -->
+  <div id="mobileMenu" class="text-white p-5">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="sidebar-title text-xl font-bold tracking-tight leading-tight">Meeting Actions</h1>
+      <button onclick="toggleMobileMenu()" class="text-2xl leading-none">×</button>
+    </div>
+
+    <nav class="space-y-2 flex-1 mb-6" id="mobileNav">
+      <a data-tab="dashboard"  class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all text-sm" onclick="switchTab('dashboard'); toggleMobileMenu();"><span>📊</span> Dashboard</a>
+      <a data-tab="all-items"  class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all text-sm" onclick="switchTab('all-items'); toggleMobileMenu();"><span>📋</span> All Action Items</a>
+      <a data-tab="add-item"   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all text-sm" onclick="switchTab('add-item'); toggleMobileMenu();"><span>➕</span> Add New Item</a>
+      <a data-tab="calendar"   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all text-sm" onclick="switchTab('calendar'); toggleMobileMenu();"><span>📅</span> Calendar View</a>
+      <a data-tab="reports"    class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all text-sm" onclick="switchTab('reports'); toggleMobileMenu();"><span>📈</span> Reports</a>
+      <a data-tab="documents"  class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all text-sm" onclick="switchTab('documents'); toggleMobileMenu();"><span>📄</span> Meeting Documents</a>
+      <a data-tab="export"     class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all text-sm" onclick="switchTab('export'); toggleMobileMenu();"><span>💾</span> Export / Import</a>
+      <a data-tab="settings"   class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all text-sm" onclick="switchTab('settings'); toggleMobileMenu();"><span>⚙️</span> Settings</a>
+      <a data-tab="help"       class="nav-link flex items-center gap-3 px-4 py-3 rounded-xl cursor-pointer transition-all text-sm" onclick="switchTab('help'); toggleMobileMenu();"><span>❓</span> Help</a>
+    </nav>
+
+    <div class="bg-white/10 rounded-2xl p-4 border border-white/10 text-sm backdrop-blur-sm mb-4">
+      <p class="text-green-400 font-semibold text-xs flex items-center gap-2"><span class="inline-block w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> Live Data</p>
+      <p class="mt-2 text-gray-200 font-medium" id="mobileItemCount">0 items tracked</p>
+      <p class="text-xs mt-1 text-gray-400" id="mobileSyncTime">Last synced just now</p>
+    </div>
+
+    <button onclick="doLogout()"
+      class="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm text-red-300 hover:bg-red-500/20 transition-all font-medium">
+      <span>🚪</span> Sign Out
+    </button>
+  </div>
+
+  <!-- Desktop Sidebar -->
   <aside class="w-64 bg-gradient-to-b from-slate-950 to-blue-950 text-white p-5 hidden md:flex flex-col flex-shrink-0 shadow-2xl">
     <h1 class="sidebar-title text-xl font-bold mb-8 tracking-tight leading-tight">Meeting Actions</h1>
 
@@ -408,10 +537,10 @@
 
   <main class="flex-1 overflow-auto bg-gray-50">
 
-    <div id="view-dashboard" class="tab-view active p-6">
+    <div id="view-dashboard" class="tab-view active p-4 md:p-6">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">Dashboard</h1>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
           <p class="text-gray-500 text-sm mt-1">Live overview of all meeting action items</p>
         </div>
         <div class="flex items-center gap-3">
@@ -422,22 +551,22 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-5 mb-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 mb-6">
         <div class="stat-card border-l-4 border-blue-500">
           <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Total Items</p>
-          <p id="totalItems" class="text-3xl font-bold mt-2 text-gray-900">0</p>
+          <p id="totalItems" class="text-2xl md:text-3xl font-bold mt-2 text-gray-900">0</p>
         </div>
         <div class="stat-card border-l-4 border-gray-400">
           <p class="text-gray-500 text-xs font-semibold uppercase tracking-wide">Not Started</p>
-          <p id="pendingItems" class="text-3xl font-bold mt-2 text-gray-700">0</p>
+          <p id="pendingItems" class="text-2xl md:text-3xl font-bold mt-2 text-gray-700">0</p>
         </div>
         <div class="stat-card border-l-4 border-yellow-400">
           <p class="text-yellow-600 text-xs font-semibold uppercase tracking-wide">In Progress</p>
-          <p id="progressItems" class="text-3xl font-bold mt-2 text-yellow-700">0</p>
+          <p id="progressItems" class="text-2xl md:text-3xl font-bold mt-2 text-yellow-700">0</p>
         </div>
         <div class="stat-card border-l-4 border-green-500">
           <p class="text-green-600 text-xs font-semibold uppercase tracking-wide">Completed</p>
-          <p id="completedItems" class="text-3xl font-bold mt-2 text-green-700">0</p>
+          <p id="completedItems" class="text-2xl md:text-3xl font-bold mt-2 text-green-700">0</p>
         </div>
       </div>
 
@@ -474,22 +603,22 @@
     </div>
 
 
-    <div id="view-all-items" class="tab-view p-6">
+    <div id="view-all-items" class="tab-view p-4 md:p-6">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-4">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900">All Action Items</h1>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">All Action Items</h1>
           <p class="text-gray-500 text-sm mt-1" id="filteredCount">Showing all items</p>
         </div>
         <div class="flex gap-3 flex-wrap">
           <button onclick="syncAllToSheet()" id="syncAllBtn"
-            class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl text-sm font-medium transition shadow-sm">
-            <span id="syncAllIcon">↻</span> Sync All to Sheet
+            class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 md:px-5 py-2.5 rounded-xl text-sm font-medium transition shadow-sm">
+            <span id="syncAllIcon">↻</span> Sync All
           </button>
-          <button onclick="switchTab('add-item')" class="btn-primary text-white px-5 py-2.5 rounded-xl text-sm font-medium">+ Add Item</button>
+          <button onclick="switchTab('add-item')" class="btn-primary text-white px-4 md:px-5 py-2.5 rounded-xl text-sm font-medium">+ Add Item</button>
         </div>
       </div>
 
-      <!-- Sync progress bar (hidden by default) -->
+      <!-- Sync progress bar -->
       <div id="syncProgressWrap" class="hidden mb-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
           <span id="syncProgressLabel">Syncing…</span>
@@ -500,7 +629,7 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-5 flex flex-wrap gap-3 items-center">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-5 mb-5 flex flex-wrap gap-3 items-center">
         <input id="allSearchInput" type="text" placeholder="🔍  Search title or owner…"
           class="border border-gray-200 rounded-xl px-4 py-2.5 text-sm flex-1 min-w-44 outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-300"
           oninput="renderAllItems()">
@@ -520,14 +649,14 @@
         <table class="w-full text-sm">
           <thead>
             <tr class="border-b bg-gray-50 text-gray-600 text-left text-xs uppercase tracking-wide font-semibold">
-              <th class="p-4 cursor-pointer hover:text-gray-900 whitespace-nowrap" onclick="sortBy('meetingDate')">Date <span id="sort-meetingDate"></span></th>
-              <th class="p-4 cursor-pointer hover:text-gray-900" onclick="sortBy('title')">Action Item <span id="sort-title"></span></th>
-              <th class="p-4 cursor-pointer hover:text-gray-900" onclick="sortBy('owner')">Owner <span id="sort-owner"></span></th>
-              <th class="p-4">Status</th>
-              <th class="p-4 cursor-pointer hover:text-gray-900 whitespace-nowrap" onclick="sortBy('dueDate')">Due Date <span id="sort-dueDate"></span></th>
-              <th class="p-4">Progress</th>
-              <th class="p-4">Notes</th>
-              <th class="p-4">Actions</th>
+              <th class="p-3 md:p-4 cursor-pointer hover:text-gray-900 whitespace-nowrap" onclick="sortBy('meetingDate')">Date <span id="sort-meetingDate"></span></th>
+              <th class="p-3 md:p-4 cursor-pointer hover:text-gray-900" onclick="sortBy('title')">Action Item <span id="sort-title"></span></th>
+              <th class="p-3 md:p-4 cursor-pointer hover:text-gray-900" onclick="sortBy('owner')">Owner <span id="sort-owner"></span></th>
+              <th class="p-3 md:p-4">Status</th>
+              <th class="p-3 md:p-4 cursor-pointer hover:text-gray-900 whitespace-nowrap" onclick="sortBy('dueDate')">Due Date <span id="sort-dueDate"></span></th>
+              <th class="p-3 md:p-4">Progress</th>
+              <th class="p-3 md:p-4 hidden md:table-cell">Notes</th>
+              <th class="p-3 md:p-4">Actions</th>
             </tr>
           </thead>
           <tbody id="allItemsBody"></tbody>
@@ -536,11 +665,11 @@
     </div>
 
 
-    <div id="view-add-item" class="tab-view p-6">
-      <h1 class="text-3xl font-bold mb-1 text-gray-900">Add Action Item</h1>
+    <div id="view-add-item" class="tab-view p-4 md:p-6">
+      <h1 class="text-2xl md:text-3xl font-bold mb-1 text-gray-900">Add Action Item</h1>
       <p class="text-gray-500 text-sm mb-7">Create a new meeting action and assign an owner</p>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-3xl">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 max-w-3xl">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="flex flex-col gap-2">
             <label class="text-xs font-semibold text-gray-600 uppercase tracking-wide">Meeting Date *</label>
@@ -585,17 +714,17 @@
     </div>
 
 
-    <div id="view-calendar" class="tab-view p-6">
+    <div id="view-calendar" class="tab-view p-4 md:p-6">
       <div class="flex justify-between items-center mb-6 flex-wrap gap-3">
-        <h1 class="text-3xl font-bold text-gray-900">Calendar View</h1>
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Calendar View</h1>
         <div class="flex items-center gap-3">
           <button onclick="prevMonth()" class="bg-white shadow-sm px-4 py-2.5 rounded-xl hover:bg-gray-50 text-sm transition font-medium border border-gray-100">‹ Prev</button>
-          <span id="calMonthLabel" class="font-semibold text-gray-700 min-w-40 text-center text-sm"></span>
+          <span id="calMonthLabel" class="font-semibold text-gray-700 min-w-32 md:min-w-40 text-center text-sm"></span>
           <button onclick="nextMonth()" class="bg-white shadow-sm px-4 py-2.5 rounded-xl hover:bg-gray-50 text-sm transition font-medium border border-gray-100">Next ›</button>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 md:p-6">
         <div class="cal-grid mb-3">
           <div class="text-xs font-bold text-gray-500 text-center pb-2">Sun</div>
           <div class="text-xs font-bold text-gray-500 text-center pb-2">Mon</div>
@@ -608,7 +737,7 @@
         <div class="cal-grid" id="calGrid"></div>
       </div>
 
-      <div class="flex gap-6 mt-5 text-xs text-gray-600 font-medium">
+      <div class="flex gap-4 md:gap-6 mt-5 text-xs text-gray-600 font-medium flex-wrap">
         <span class="flex items-center gap-2"><span class="inline-block w-4 h-4 rounded bg-yellow-400"></span>In Progress</span>
         <span class="flex items-center gap-2"><span class="inline-block w-4 h-4 rounded bg-green-400"></span>Completed</span>
         <span class="flex items-center gap-2"><span class="inline-block w-3 h-3 rounded-full border-2 border-blue-500"></span>Today</span>
@@ -616,22 +745,22 @@
     </div>
 
 
-    <div id="view-reports" class="tab-view p-6">
-      <h1 class="text-3xl font-bold mb-1 text-gray-900">Reports</h1>
+    <div id="view-reports" class="tab-view p-4 md:p-6">
+      <h1 class="text-2xl md:text-3xl font-bold mb-1 text-gray-900">Reports</h1>
       <p class="text-gray-500 text-sm mb-7">Analytics and performance metrics</p>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 gap-5 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
         <div class="bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-2xl p-6 shadow-lg">
           <p class="text-xs opacity-80 mb-2 font-semibold uppercase tracking-wide">Avg. Completion</p>
-          <p id="rpt-avgProgress" class="text-4xl font-bold">—</p>
+          <p id="rpt-avgProgress" class="text-3xl md:text-4xl font-bold">—</p>
         </div>
         <div class="bg-gradient-to-br from-green-500 to-emerald-600 text-white rounded-2xl p-6 shadow-lg">
           <p class="text-xs opacity-80 mb-2 font-semibold uppercase tracking-wide">On-time Rate</p>
-          <p id="rpt-ontime" class="text-4xl font-bold">—</p>
+          <p id="rpt-ontime" class="text-3xl md:text-4xl font-bold">—</p>
         </div>
         <div class="bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-2xl p-6 shadow-lg">
           <p class="text-xs opacity-80 mb-2 font-semibold uppercase tracking-wide">Unique Owners</p>
-          <p id="rpt-owners" class="text-4xl font-bold">—</p>
+          <p id="rpt-owners" class="text-3xl md:text-4xl font-bold">—</p>
         </div>
       </div>
 
@@ -666,8 +795,8 @@
     </div>
 
 
-    <div id="view-documents" class="tab-view p-6">
-      <h1 class="text-3xl font-bold mb-2 text-gray-900">Meeting Documents</h1>
+    <div id="view-documents" class="tab-view p-4 md:p-6">
+      <h1 class="text-2xl md:text-3xl font-bold mb-2 text-gray-900">Meeting Documents</h1>
       <p class="text-gray-500 text-sm mb-8">Access all Minutes of Meetings (MOMs) and related documents</p>
 
       <!-- Main MOM Access Card -->
@@ -708,8 +837,8 @@
     </div>
 
 
-    <div id="view-export" class="tab-view p-6">
-      <h1 class="text-3xl font-bold mb-1 text-gray-900">Export / Import</h1>
+    <div id="view-export" class="tab-view p-4 md:p-6">
+      <h1 class="text-2xl md:text-3xl font-bold mb-1 text-gray-900">Export / Import</h1>
       <p class="text-gray-500 text-sm mb-7">Download your data or load from CSV / JSON</p>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mb-6">
@@ -754,7 +883,7 @@
           </div>
           <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 text-xs text-gray-600">
             <p class="font-semibold text-gray-700 mb-2">CSV Column Order:</p>
-            <code class="block text-gray-600 bg-white px-3 py-2 rounded border border-blue-200">meetingDate, title, owner, status, dueDate, progress, notes</code>
+            <code class="block text-gray-600 bg-white px-3 py-2 rounded border border-blue-200 text-xs">meetingDate, title, owner, status, dueDate, progress, notes</code>
           </div>
         </div>
       </div>
@@ -763,15 +892,15 @@
         <h2 class="font-semibold text-sm text-gray-700 mb-5">Data Summary</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-5 text-center text-sm">
           <div class="bg-blue-50 border border-blue-100 rounded-xl p-5">
-            <p class="text-3xl font-bold text-blue-600" id="exp-total">0</p>
+            <p class="text-2xl md:text-3xl font-bold text-blue-600" id="exp-total">0</p>
             <p class="text-gray-600 mt-2 text-xs font-medium">Total Records</p>
           </div>
           <div class="bg-gray-50 border border-gray-200 rounded-xl p-5">
-            <p class="text-3xl font-bold text-gray-700" id="exp-size">—</p>
+            <p class="text-2xl md:text-3xl font-bold text-gray-700" id="exp-size">—</p>
             <p class="text-gray-600 mt-2 text-xs font-medium">Approx. Size</p>
           </div>
-          <div class="bg-purple-50 border border-purple-100 rounded-xl p-5">
-            <p class="text-3xl font-bold text-purple-600" id="exp-owners">0</p>
+          <div class="bg-purple-50 border border-purple-100 rounded-xl p-5 col-span-2 md:col-span-1">
+            <p class="text-2xl md:text-3xl font-bold text-purple-600" id="exp-owners">0</p>
             <p class="text-gray-600 mt-2 text-xs font-medium">Unique Owners</p>
           </div>
         </div>
@@ -779,17 +908,17 @@
     </div>
 
 
-    <div id="view-settings" class="tab-view p-6 max-w-2xl">
-      <h1 class="text-3xl font-bold mb-1 text-gray-900">Settings</h1>
+    <div id="view-settings" class="tab-view p-4 md:p-6 max-w-2xl">
+      <h1 class="text-2xl md:text-3xl font-bold mb-1 text-gray-900">Settings</h1>
       <p class="text-gray-500 text-sm mb-7">Customise dashboard behaviour</p>
 
       <div class="space-y-4">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex justify-between items-center gap-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <p class="font-semibold text-sm text-gray-900">Default Status</p>
             <p class="text-xs text-gray-500 mt-1">Pre-fill when adding items</p>
           </div>
-          <select id="set-status" class="w-44 p-3 border border-gray-200 rounded-xl outline-none text-sm focus:ring-2 focus:ring-blue-300"
+          <select id="set-status" class="w-full md:w-44 p-3 border border-gray-200 rounded-xl outline-none text-sm focus:ring-2 focus:ring-blue-300"
             onchange="saveSetting('defaultStatus', this.value)">
             <option value="Not Started">Not Started</option>
             <option value="In Progress">In Progress</option>
@@ -797,13 +926,13 @@
           </select>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex justify-between items-center gap-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <p class="font-semibold text-sm text-gray-900">Dashboard Title</p>
             <p class="text-xs text-gray-500 mt-1">Shown in the sidebar header</p>
           </div>
           <input id="set-dashName" type="text" value="Meeting Actions" placeholder="Dashboard name"
-            class="border border-gray-200 rounded-xl px-4 py-3 text-sm w-44 outline-none focus:ring-2 focus:ring-blue-300"
+            class="border border-gray-200 rounded-xl px-4 py-3 text-sm w-full md:w-44 outline-none focus:ring-2 focus:ring-blue-300"
             onchange="saveSetting('dashName', this.value); document.querySelectorAll('.sidebar-title').forEach(el=>el.innerText=this.value)">
         </div>
       </div>
@@ -815,8 +944,8 @@
     </div>
 
 
-    <div id="view-help" class="tab-view p-6 max-w-3xl">
-      <h1 class="text-3xl font-bold mb-1 text-gray-900">Help & Guide</h1>
+    <div id="view-help" class="tab-view p-4 md:p-6 max-w-3xl">
+      <h1 class="text-2xl md:text-3xl font-bold mb-1 text-gray-900">Help & Guide</h1>
       <p class="text-gray-500 text-sm mb-7">Quick answers and usage tips</p>
       <div class="space-y-3">
         <details class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6" open>
@@ -859,8 +988,8 @@
   </main>
 </div>
 
-<div id="editModal" class="fixed inset-0 bg-black/50 hidden justify-center items-center p-4 z-50">
-  <div class="bg-white rounded-2xl p-8 w-full max-w-2xl shadow-2xl">
+<div id="editModal" class="fixed inset-0 bg-black/50 hidden justify-center items-center p-4 z-50 overflow-y-auto">
+  <div class="bg-white rounded-2xl p-6 md:p-8 w-full max-w-2xl shadow-2xl my-8">
     <h2 class="text-xl font-bold mb-6 text-gray-900">Edit Action Item</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
       <div class="flex flex-col gap-2">
@@ -913,39 +1042,68 @@ let sortKey = 'meetingDate';
 let sortAsc = false;
 let _editIndex = null;
 
-const today    = new Date();
-let calYear    = today.getFullYear();
-let calMonth   = today.getMonth();
+const today = new Date();
+let calYear = today.getFullYear();
+let calMonth = today.getMonth();
 const charts = {};
 
-// Ensure renderCurrentTab forwards to our renderAll mapping function
-function renderCurrentTab() {
-  renderAll();
-}
-
 // ── SHEETDB CONFIGURATION ─────────────────────────────────────────
-const SHEETDB_URL = 'https://sheetdb.io/api/v1/y98sav0esojjr'; // <--- REPLACE WITH YOUR SHEETDB API ID
+const SHEETDB_URL = 'https://sheetdb.io/api/v1/y98sav0esojjr';
 
 async function loadData() {
   try {
     const response = await fetch(SHEETDB_URL);
     if (response.ok) {
       items = await response.json();
-      // Ensure progress is treated as a number
       items.forEach(i => i.progress = parseInt(i.progress) || 0);
-      console.log('✓ Data loaded from SheetDB');
+      console.log('✓ Data loaded from SheetDB:', items.length, 'items');
+      renderAll();
     } else {
       console.error('SheetDB returned status:', response.status);
       showToast('⚠ Could not load from SheetDB (Status: ' + response.status + ')');
+      items = getSampleData();
+      renderAll();
     }
   } catch (error) {
     console.error('SheetDB load error:', error);
-    if (!items.length) items = [];
-    showToast('⚠ Could not load from SheetDB: ' + error.message);
+    showToast('⚠ Using sample data (SheetDB not available)');
+    items = getSampleData();
+    renderAll();
   }
 }
 
-// Store settings locally since the spreadsheet is for tabular action items
+function getSampleData() {
+  return [
+    {
+      meetingDate: '2025-05-15',
+      title: 'Review sustainability metrics dashboard',
+      owner: 'Sarah Johnson',
+      status: 'Completed',
+      dueDate: '2025-05-20',
+      progress: 100,
+      notes: 'Dashboard deployed and verified'
+    },
+    {
+      meetingDate: '2025-05-15',
+      title: 'Finalize Q2 carbon emission report',
+      owner: 'Michael Chen',
+      status: 'In Progress',
+      dueDate: '2025-05-28',
+      progress: 65,
+      notes: 'Data collection phase complete'
+    },
+    {
+      meetingDate: '2025-05-18',
+      title: 'Schedule training on new recycling procedures',
+      owner: 'Priya Sharma',
+      status: 'Not Started',
+      dueDate: '2025-06-05',
+      progress: 0,
+      notes: 'Pending venue confirmation'
+    }
+  ];
+}
+
 function loadSettings() {
   settings = JSON.parse(localStorage.getItem('dashSettings')) || {
     defaultStatus: 'Not Started',
@@ -966,7 +1124,6 @@ const VALID_STATUSES = {
   COMPLETED: 'Completed'
 };
 
-// Enforce status-progress synchronization
 function syncStatusProgress(item) {
   item.progress = Math.max(0, Math.min(100, parseInt(item.progress) || 0));
   if (item.progress === 0) {
@@ -979,25 +1136,37 @@ function syncStatusProgress(item) {
   return item;
 }
 
-// Auto-set progress based on status
 function syncProgressStatus(item) {
   if (item.status === VALID_STATUSES.NOT_STARTED) {
     item.progress = 0;
   } else if (item.status === VALID_STATUSES.COMPLETED) {
     item.progress = 100;
   } else if (item.status === VALID_STATUSES.IN_PROGRESS && item.progress === 0) {
-    item.progress = 1; // Start at 1% when moving to in progress
+    item.progress = 1;
   }
   item.progress = Math.max(0, Math.min(100, parseInt(item.progress) || 0));
   return item;
 }
 
+// ── Mobile Menu Toggle ────────────────────────────────────────────
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const overlay = document.getElementById('mobileOverlay');
+  const isOpen = menu.classList.contains('open');
+  
+  if (isOpen) {
+    menu.classList.remove('open');
+    overlay.classList.remove('show');
+  } else {
+    menu.classList.add('open');
+    overlay.classList.add('show');
+  }
+}
+
 // ── Utilities ─────────────────────────────────────────────────────
 function refreshAll() {
-  loadData().then(() => {
-    renderAll();
-    showToast('Refreshed ✓');
-  });
+  loadData();
+  showToast('Refreshed ✓');
 }
 
 function showToast(msg) {
@@ -1016,8 +1185,8 @@ function switchTab(tab) {
   const view = document.getElementById('view-' + tab);
   if (view) view.classList.add('active');
 
-  const link = document.querySelector(`[data-tab="${tab}"]`);
-  if (link) link.classList.add('active-tab');
+  const links = document.querySelectorAll(`[data-tab="${tab}"]`);
+  links.forEach(link => link.classList.add('active-tab'));
 
   if (tab === 'dashboard')  renderDashboard();
   if (tab === 'all-items')  renderAllItems();
@@ -1028,7 +1197,10 @@ function switchTab(tab) {
 }
 
 document.querySelectorAll('.nav-link').forEach(link => {
-  link.addEventListener('click', () => switchTab(link.dataset.tab));
+  link.addEventListener('click', () => {
+    const tab = link.dataset.tab;
+    switchTab(tab);
+  });
 });
 
 document.addEventListener('keydown', e => {
@@ -1049,33 +1221,631 @@ function renderAll() {
 
 function updateSidebarMeta() {
   const d = new Date();
-  document.getElementById('sidebarItemCount').innerText = items.length + ' items tracked';
-  document.getElementById('sidebarSyncTime').innerText = 'Last synced at ' + d.toLocaleTimeString();
+  const count = items.length + ' items tracked';
+  const time = 'Last synced at ' + d.toLocaleTimeString();
+  
+  document.getElementById('sidebarItemCount').innerText = count;
+  document.getElementById('sidebarSyncTime').innerText = time;
+  document.getElementById('mobileItemCount').innerText = count;
+  document.getElementById('mobileSyncTime').innerText = time;
 }
 
-// ── STUB IMPLEMENTATIONS (reduce code, keep demo-ready) ──────────
-function renderDashboard() {}
-function renderAllItems() {}
-function renderCalendar() {}
-function renderReports() {}
-function renderExportTab() {}
-function applySettingsUI() {}
-function syncAllToSheet() {}
-function sortBy(key) {}
-function clearFilters() {}
-function clearForm() {}
-function exportCSV() {}
-function exportJSON() {}
-function handleDrop(e) {}
-function handleImport(e) {}
-function prevMonth() {}
-function nextMonth() {}
-function submitFormItem() {}
-function closeEditModal() {}
-function handleEditStatusChange() {}
-function saveEditItem() {}
+// ── DASHBOARD ─────────────────────────────────────────────────────
+function renderDashboard() {
+  const total = items.length;
+  const notStarted = items.filter(i => i.status === 'Not Started').length;
+  const inProgress = items.filter(i => i.status === 'In Progress').length;
+  const completed = items.filter(i => i.status === 'Completed').length;
 
-// ── LOGIN FUNCTIONS (NOW IMPLEMENTED) ──────────────────────────────
+  document.getElementById('totalItems').innerText = total;
+  document.getElementById('pendingItems').innerText = notStarted;
+  document.getElementById('progressItems').innerText = inProgress;
+  document.getElementById('completedItems').innerText = completed;
+
+  // Completion rate
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  document.getElementById('completionPct').innerText = pct + '%';
+  const ring = document.getElementById('completionRing');
+  const circumference = 301.6;
+  const offset = circumference - (pct / 100) * circumference;
+  ring.style.strokeDashoffset = offset;
+
+  // Status Chart
+  renderStatusChart(notStarted, inProgress, completed);
+
+  // Recent Activity
+  const recent = items.slice().sort((a, b) => new Date(b.meetingDate) - new Date(a.meetingDate)).slice(0, 5);
+  const recentHtml = recent.map(i => `
+    <li class="flex items-start gap-3 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
+      <span class="text-2xl">${i.status === 'Completed' ? '✅' : i.status === 'In Progress' ? '⏳' : '⏸️'}</span>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-medium text-gray-900 truncate">${i.title}</p>
+        <p class="text-xs text-gray-500 mt-1">${i.owner} · ${formatDate(i.meetingDate)}</p>
+      </div>
+    </li>
+  `).join('');
+  document.getElementById('recentActivity').innerHTML = recentHtml || '<p class="text-gray-400 text-sm">No activity yet</p>';
+
+  // Top Owners
+  const ownerMap = {};
+  items.forEach(i => {
+    if (!ownerMap[i.owner]) ownerMap[i.owner] = { total: 0, completed: 0 };
+    ownerMap[i.owner].total++;
+    if (i.status === 'Completed') ownerMap[i.owner].completed++;
+  });
+  const topOwners = Object.entries(ownerMap)
+    .sort((a, b) => b[1].total - a[1].total)
+    .slice(0, 5);
+  
+  const ownersHtml = topOwners.map(([name, stats]) => {
+    const pct = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+    return `
+      <div class="flex items-center gap-3">
+        <div class="flex-1">
+          <div class="flex justify-between items-center mb-1">
+            <span class="text-sm font-medium text-gray-900">${name}</span>
+            <span class="text-xs text-gray-500">${stats.completed}/${stats.total}</span>
+          </div>
+          <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-blue-600 h-2 rounded-full transition-all" style="width: ${pct}%"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  document.getElementById('ownerLeaderboard').innerHTML = ownersHtml || '<p class="text-gray-400 text-sm">No owners yet</p>';
+}
+
+function renderStatusChart(notStarted, inProgress, completed) {
+  const ctx = document.getElementById('statusChart');
+  if (charts.status) charts.status.destroy();
+  
+  charts.status = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Not Started', 'In Progress', 'Completed'],
+      datasets: [{
+        data: [notStarted, inProgress, completed],
+        backgroundColor: ['#64748b', '#f59e0b', '#10b981'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { position: 'bottom' }
+      }
+    }
+  });
+}
+
+// ── ALL ITEMS ─────────────────────────────────────────────────────
+function renderAllItems() {
+  const search = document.getElementById('allSearchInput').value.toLowerCase();
+  const statusFilter = document.getElementById('filterStatus').value;
+  const ownerFilter = document.getElementById('filterOwner').value;
+
+  let filtered = items.filter(i => {
+    const matchSearch = !search || i.title.toLowerCase().includes(search) || i.owner.toLowerCase().includes(search);
+    const matchStatus = !statusFilter || i.status === statusFilter;
+    const matchOwner = !ownerFilter || i.owner === ownerFilter;
+    return matchSearch && matchStatus && matchOwner;
+  });
+
+  // Sort
+  filtered.sort((a, b) => {
+    let aVal = a[sortKey] || '';
+    let bVal = b[sortKey] || '';
+    if (sortKey === 'progress') {
+      aVal = parseInt(aVal) || 0;
+      bVal = parseInt(bVal) || 0;
+    }
+    if (aVal < bVal) return sortAsc ? -1 : 1;
+    if (aVal > bVal) return sortAsc ? 1 : -1;
+    return 0;
+  });
+
+  // Update filter dropdown
+  const owners = [...new Set(items.map(i => i.owner))].sort();
+  const ownerSelect = document.getElementById('filterOwner');
+  const currentOwner = ownerSelect.value;
+  ownerSelect.innerHTML = '<option value="">All Owners</option>' + 
+    owners.map(o => `<option value="${o}" ${o === currentOwner ? 'selected' : ''}>${o}</option>`).join('');
+
+  // Render table
+  const tbody = document.getElementById('allItemsBody');
+  tbody.innerHTML = filtered.map((item, idx) => {
+    const statusColor = item.status === 'Completed' ? 'bg-green-100 text-green-700' :
+                        item.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-gray-100 text-gray-700';
+    return `
+      <tr class="border-b hover:bg-gray-50">
+        <td class="p-3 md:p-4 text-xs md:text-sm whitespace-nowrap">${formatDate(item.meetingDate)}</td>
+        <td class="p-3 md:p-4 text-xs md:text-sm">${item.title}</td>
+        <td class="p-3 md:p-4 text-xs md:text-sm">${item.owner}</td>
+        <td class="p-3 md:p-4">
+          <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColor}">${item.status}</span>
+        </td>
+        <td class="p-3 md:p-4 text-xs md:text-sm whitespace-nowrap">${formatDate(item.dueDate)}</td>
+        <td class="p-3 md:p-4 text-xs md:text-sm">${item.progress}%</td>
+        <td class="p-3 md:p-4 text-xs md:text-sm hidden md:table-cell max-w-xs truncate">${item.notes || '—'}</td>
+        <td class="p-3 md:p-4">
+          <div class="flex gap-2">
+            <button onclick="editItem(${items.indexOf(item)})" class="text-blue-600 hover:text-blue-800 text-xs font-medium">Edit</button>
+            <button onclick="deleteItem(${items.indexOf(item)})" class="text-red-600 hover:text-red-800 text-xs font-medium">Delete</button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  document.getElementById('filteredCount').innerText = `Showing ${filtered.length} of ${items.length} items`;
+
+  // Update sort indicators
+  ['meetingDate', 'title', 'owner', 'dueDate'].forEach(k => {
+    const el = document.getElementById('sort-' + k);
+    if (el) el.innerText = sortKey === k ? (sortAsc ? '▲' : '▼') : '';
+  });
+}
+
+function sortBy(key) {
+  if (sortKey === key) {
+    sortAsc = !sortAsc;
+  } else {
+    sortKey = key;
+    sortAsc = true;
+  }
+  renderAllItems();
+}
+
+function clearFilters() {
+  document.getElementById('allSearchInput').value = '';
+  document.getElementById('filterStatus').value = '';
+  document.getElementById('filterOwner').value = '';
+  renderAllItems();
+}
+
+// ── EDIT / DELETE ─────────────────────────────────────────────────
+function editItem(idx) {
+  _editIndex = idx;
+  const item = items[idx];
+  
+  document.getElementById('em-meetingDate').value = item.meetingDate;
+  document.getElementById('em-title').value = item.title;
+  document.getElementById('em-owner').value = item.owner;
+  document.getElementById('em-status').value = item.status;
+  document.getElementById('em-dueDate').value = item.dueDate;
+  document.getElementById('em-progress').value = item.progress;
+  document.getElementById('em-notes').value = item.notes;
+  
+  document.getElementById('editModal').style.display = 'flex';
+}
+
+function closeEditModal() {
+  document.getElementById('editModal').style.display = 'none';
+  _editIndex = null;
+}
+
+function handleEditStatusChange(status) {
+  const progressInput = document.getElementById('em-progress');
+  if (status === 'Not Started') {
+    progressInput.value = 0;
+  } else if (status === 'Completed') {
+    progressInput.value = 100;
+  } else if (status === 'In Progress' && progressInput.value === '0') {
+    progressInput.value = 1;
+  }
+}
+
+async function saveEditItem() {
+  if (_editIndex === null) return;
+  
+  const item = items[_editIndex];
+  item.meetingDate = document.getElementById('em-meetingDate').value;
+  item.title = document.getElementById('em-title').value;
+  item.owner = document.getElementById('em-owner').value;
+  item.status = document.getElementById('em-status').value;
+  item.dueDate = document.getElementById('em-dueDate').value;
+  item.progress = parseInt(document.getElementById('em-progress').value) || 0;
+  item.notes = document.getElementById('em-notes').value;
+  
+  syncProgressStatus(item);
+  
+  try {
+    await fetch(SHEETDB_URL + '/id/' + _editIndex, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: item })
+    });
+    showToast('Item updated ✓');
+  } catch (error) {
+    console.error('Update error:', error);
+    showToast('⚠ Update failed (offline mode)');
+  }
+  
+  closeEditModal();
+  renderAll();
+}
+
+async function deleteItem(idx) {
+  if (!confirm('Delete this action item?')) return;
+  
+  try {
+    await fetch(SHEETDB_URL + '/id/' + idx, { method: 'DELETE' });
+    items.splice(idx, 1);
+    showToast('Item deleted ✓');
+  } catch (error) {
+    console.error('Delete error:', error);
+    items.splice(idx, 1);
+    showToast('⚠ Item deleted (offline mode)');
+  }
+  
+  renderAll();
+}
+
+// ── ADD ITEM ──────────────────────────────────────────────────────
+async function submitFormItem() {
+  const meetingDate = document.getElementById('f-meetingDate').value;
+  const title = document.getElementById('f-title').value.trim();
+  const owner = document.getElementById('f-owner').value.trim();
+  
+  if (!meetingDate || !title || !owner) {
+    showToast('⚠ Please fill in all required fields');
+    return;
+  }
+  
+  const newItem = {
+    meetingDate,
+    title,
+    owner,
+    status: document.getElementById('f-status').value,
+    dueDate: document.getElementById('f-dueDate').value,
+    progress: parseInt(document.getElementById('f-progress').value) || 0,
+    notes: document.getElementById('f-notes').value.trim()
+  };
+  
+  syncProgressStatus(newItem);
+  
+  try {
+    await fetch(SHEETDB_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: newItem })
+    });
+    items.push(newItem);
+    showToast('Action item added ✓');
+  } catch (error) {
+    console.error('Add error:', error);
+    items.push(newItem);
+    showToast('⚠ Item added (offline mode)');
+  }
+  
+  clearForm();
+  renderAll();
+  switchTab('all-items');
+}
+
+function clearForm() {
+  document.getElementById('f-meetingDate').value = '';
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-owner').value = '';
+  document.getElementById('f-status').value = 'Not Started';
+  document.getElementById('f-dueDate').value = '';
+  document.getElementById('f-progress').value = 0;
+  document.getElementById('f-progressVal').innerText = '0%';
+  document.getElementById('f-notes').value = '';
+}
+
+// ── CALENDAR ──────────────────────────────────────────────────────
+function renderCalendar() {
+  const label = new Date(calYear, calMonth).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('calMonthLabel').innerText = label;
+  
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+  
+  // Empty cells before month starts
+  for (let i = 0; i < firstDay; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'cal-day opacity-20';
+    grid.appendChild(empty);
+  }
+  
+  // Days of the month
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const dayItems = items.filter(i => i.dueDate === dateStr);
+    
+    const isToday = dateStr === today.toISOString().split('T')[0];
+    
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'cal-day' + (isToday ? ' today' : '') + (dayItems.length ? ' has-item' : '');
+    dayDiv.innerHTML = `
+      <div class="font-bold text-sm text-gray-700">${day}</div>
+      ${dayItems.slice(0, 3).map(i => 
+        `<div class="cal-dot status-${i.status.replace(/ /g, '-')}">${i.title.slice(0, 20)}</div>`
+      ).join('')}
+      ${dayItems.length > 3 ? `<div class="text-xs text-gray-500 mt-1">+${dayItems.length - 3} more</div>` : ''}
+    `;
+    
+    if (dayItems.length) {
+      dayDiv.onclick = () => {
+        alert(dayItems.map(i => `${i.title} (${i.owner})`).join('\n'));
+      };
+    }
+    
+    grid.appendChild(dayDiv);
+  }
+}
+
+function prevMonth() {
+  calMonth--;
+  if (calMonth < 0) {
+    calMonth = 11;
+    calYear--;
+  }
+  renderCalendar();
+}
+
+function nextMonth() {
+  calMonth++;
+  if (calMonth > 11) {
+    calMonth = 0;
+    calYear++;
+  }
+  renderCalendar();
+}
+
+// ── REPORTS ───────────────────────────────────────────────────────
+function renderReports() {
+  // Average progress
+  const avgProgress = items.length > 0 
+    ? Math.round(items.reduce((sum, i) => sum + parseInt(i.progress || 0), 0) / items.length)
+    : 0;
+  document.getElementById('rpt-avgProgress').innerText = avgProgress + '%';
+  
+  // On-time rate
+  const withDue = items.filter(i => i.dueDate);
+  const onTime = withDue.filter(i => {
+    if (i.status !== 'Completed') return false;
+    return new Date(i.dueDate) >= new Date();
+  });
+  const onTimePct = withDue.length > 0 ? Math.round((onTime.length / withDue.length) * 100) : 0;
+  document.getElementById('rpt-ontime').innerText = onTimePct + '%';
+  
+  // Unique owners
+  const uniqueOwners = new Set(items.map(i => i.owner)).size;
+  document.getElementById('rpt-owners').innerText = uniqueOwners;
+  
+  // Owner chart
+  const ownerCounts = {};
+  items.forEach(i => {
+    ownerCounts[i.owner] = (ownerCounts[i.owner] || 0) + 1;
+  });
+  
+  const ownerLabels = Object.keys(ownerCounts).sort((a, b) => ownerCounts[b] - ownerCounts[a]).slice(0, 10);
+  const ownerData = ownerLabels.map(o => ownerCounts[o]);
+  
+  const ownerCtx = document.getElementById('rptOwnerChart');
+  if (charts.rptOwner) charts.rptOwner.destroy();
+  charts.rptOwner = new Chart(ownerCtx, {
+    type: 'bar',
+    data: {
+      labels: ownerLabels,
+      datasets: [{
+        label: 'Items',
+        data: ownerData,
+        backgroundColor: '#3b82f6'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } }
+    }
+  });
+  
+  // Status chart
+  const statusCounts = {
+    'Not Started': items.filter(i => i.status === 'Not Started').length,
+    'In Progress': items.filter(i => i.status === 'In Progress').length,
+    'Completed': items.filter(i => i.status === 'Completed').length
+  };
+  
+  const statusCtx = document.getElementById('rptStatusChart');
+  if (charts.rptStatus) charts.rptStatus.destroy();
+  charts.rptStatus = new Chart(statusCtx, {
+    type: 'pie',
+    data: {
+      labels: Object.keys(statusCounts),
+      datasets: [{
+        data: Object.values(statusCounts),
+        backgroundColor: ['#64748b', '#f59e0b', '#10b981']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+  
+  // Owner performance table
+  const ownerStats = {};
+  items.forEach(i => {
+    if (!ownerStats[i.owner]) {
+      ownerStats[i.owner] = { total: 0, completed: 0, inProgress: 0, progress: [] };
+    }
+    ownerStats[i.owner].total++;
+    if (i.status === 'Completed') ownerStats[i.owner].completed++;
+    if (i.status === 'In Progress') ownerStats[i.owner].inProgress++;
+    ownerStats[i.owner].progress.push(parseInt(i.progress) || 0);
+  });
+  
+  const tableHtml = Object.entries(ownerStats)
+    .sort((a, b) => b[1].total - a[1].total)
+    .map(([owner, stats]) => {
+      const avgProg = Math.round(stats.progress.reduce((a, b) => a + b, 0) / stats.progress.length);
+      return `
+        <tr class="border-b hover:bg-gray-50">
+          <td class="p-3 font-medium">${owner}</td>
+          <td class="p-3">${stats.total}</td>
+          <td class="p-3 text-green-600 font-semibold">${stats.completed}</td>
+          <td class="p-3 text-yellow-600 font-semibold">${stats.inProgress}</td>
+          <td class="p-3">${avgProg}%</td>
+        </tr>
+      `;
+    }).join('');
+  
+  document.getElementById('rptOwnerTable').innerHTML = tableHtml;
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────
+function renderExportTab() {
+  document.getElementById('exp-total').innerText = items.length;
+  
+  const size = new Blob([JSON.stringify(items)]).size;
+  const sizeStr = size < 1024 ? size + ' B' : 
+                  size < 1024 * 1024 ? Math.round(size / 1024) + ' KB' :
+                  Math.round(size / (1024 * 1024)) + ' MB';
+  document.getElementById('exp-size').innerText = sizeStr;
+  
+  const uniqueOwners = new Set(items.map(i => i.owner)).size;
+  document.getElementById('exp-owners').innerText = uniqueOwners;
+}
+
+function exportCSV() {
+  const headers = ['meetingDate', 'title', 'owner', 'status', 'dueDate', 'progress', 'notes'];
+  const csv = [
+    headers.join(','),
+    ...items.map(i => headers.map(h => JSON.stringify(i[h] || '')).join(','))
+  ].join('\n');
+  
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'action-items-' + new Date().toISOString().split('T')[0] + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exported ✓');
+}
+
+function exportJSON() {
+  const json = JSON.stringify(items, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'action-items-' + new Date().toISOString().split('T')[0] + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('JSON exported ✓');
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (file) processImportFile(file);
+}
+
+function handleImport(e) {
+  const file = e.target.files[0];
+  if (file) processImportFile(file);
+}
+
+function processImportFile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      if (file.name.endsWith('.json')) {
+        const data = JSON.parse(e.target.result);
+        items = data;
+        showToast(`Imported ${items.length} items ✓`);
+      } else if (file.name.endsWith('.csv')) {
+        const lines = e.target.result.split('\n').filter(l => l.trim());
+        const headers = lines[0].split(',');
+        items = lines.slice(1).map(line => {
+          const values = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
+          const obj = {};
+          headers.forEach((h, i) => {
+            obj[h.trim()] = values[i] ? values[i].replace(/^"|"$/g, '').trim() : '';
+          });
+          obj.progress = parseInt(obj.progress) || 0;
+          return obj;
+        });
+        showToast(`Imported ${items.length} items ✓`);
+      }
+      renderAll();
+      syncAllToSheet();
+    } catch (error) {
+      showToast('⚠ Import failed: ' + error.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ── SYNC TO SHEET ─────────────────────────────────────────────────
+async function syncAllToSheet() {
+  const btn = document.getElementById('syncAllBtn');
+  const icon = document.getElementById('syncAllIcon');
+  const progressWrap = document.getElementById('syncProgressWrap');
+  const progressBar = document.getElementById('syncProgressBar');
+  const progressPct = document.getElementById('syncProgressPct');
+  const progressLabel = document.getElementById('syncProgressLabel');
+  
+  btn.disabled = true;
+  icon.classList.add('spinning');
+  progressWrap.classList.remove('hidden');
+  
+  try {
+    for (let i = 0; i < items.length; i++) {
+      const pct = Math.round(((i + 1) / items.length) * 100);
+      progressBar.style.width = pct + '%';
+      progressPct.innerText = pct + '%';
+      progressLabel.innerText = `Syncing item ${i + 1} of ${items.length}…`;
+      
+      await fetch(SHEETDB_URL + '/id/' + i, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: items[i] })
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    showToast('All items synced to sheet ✓');
+  } catch (error) {
+    console.error('Sync error:', error);
+    showToast('⚠ Sync failed: ' + error.message);
+  } finally {
+    btn.disabled = false;
+    icon.classList.remove('spinning');
+    setTimeout(() => {
+      progressWrap.classList.add('hidden');
+      progressBar.style.width = '0%';
+    }, 500);
+  }
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────
+function applySettingsUI() {
+  document.getElementById('set-status').value = settings.defaultStatus || 'Not Started';
+  document.getElementById('set-dashName').value = settings.dashName || 'Meeting Actions';
+}
+
+// ── UTILITIES ─────────────────────────────────────────────────────
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// ── LOGIN FUNCTIONS ───────────────────────────────────────────────
 function togglePassVisibility() {
   const passInput = document.getElementById('loginPass');
   const eyeBtn = document.getElementById('eyeBtn');
@@ -1093,7 +1863,6 @@ function doLogin() {
   const password = document.getElementById('loginPass').value.trim();
   const loginError = document.getElementById('loginError');
 
-  // Simple validation: both fields required
   if (!username || !password) {
     loginError.classList.remove('hidden');
     document.getElementById('loginCard').classList.add('shake');
@@ -1101,7 +1870,6 @@ function doLogin() {
     return;
   }
 
-  // Strictly check for the required ID and Password
   const isValidCredential = username === 'Sustainability@ABG' && password === 'GSC@2026';
 
   if (!isValidCredential) {
@@ -1111,12 +1879,10 @@ function doLogin() {
     return;
   }
 
-  // Hide login screen, show app
   loginError.classList.add('hidden');
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('appWrapper').classList.add('visible');
 
-  // Load data
   loadSettings();
   loadData();
   switchTab('dashboard');
@@ -1127,13 +1893,11 @@ function doLogin() {
 function doLogout() {
   if (!confirm('Are you sure you want to sign out?')) return;
 
-  // Reset form
   document.getElementById('loginUser').value = '';
   document.getElementById('loginPass').value = '';
   document.getElementById('loginPass').type = 'password';
   document.getElementById('eyeBtn').textContent = '👁';
 
-  // Show login screen, hide app
   document.getElementById('loginScreen').classList.remove('hidden');
   document.getElementById('appWrapper').classList.remove('visible');
   document.getElementById('loginError').classList.add('hidden');
@@ -1141,10 +1905,9 @@ function doLogout() {
   showToast('Signed out ✓');
 }
 
-// ── Initialize on page load ──────────────────────────────────────
+// ── Initialize ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   loadSettings();
-  // Don't load data until login succeeds
 });
 </script>
 </body>
