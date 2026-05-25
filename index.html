@@ -1442,42 +1442,11 @@ function handleEditStatusChange(status) {
   }
 }
 
+
 async function saveEditItem() {
-  async function saveEditItem() {
+  async function saveEditItem() {  // <── Duplicate nested declaration!
   if (_editIndex === null) return;
-  
-  const item = items[_editIndex];
-  item.meetingDate = document.getElementById('em-meetingDate').value;
-  item.title = document.getElementById('em-title').value;
-  item.owner = document.getElementById('em-owner').value;
-  item.status = document.getElementById('em-status').value;
-  item.dueDate = document.getElementById('em-dueDate').value;
-  item.progress = parseInt(document.getElementById('em-progress').value) || 0;
-  item.notes = document.getElementById('em-notes').value;
-  
-  syncProgressStatus(item);
-  
-  try {
-    // We match via the unique combination of the action title to update the correct row
-    const response = await fetch(`${SHEETDB_URL}/title/${encodeURIComponent(item.title)}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ data: item })
-    });
-    
-    if (response.ok) {
-      showToast('Item updated in spreadsheet ✓');
-    } else {
-      throw new Error('SheetDB write error');
-    }
-  } catch (error) {
-    console.error('Update error:', error);
-    showToast('⚠ Update failed (Saved locally only)');
-  }
-  
-  closeEditModal();
-  renderAll();
-}
+  ...
 
 async function deleteItem(idx) {
   if (!confirm('Delete this action item?')) return;
