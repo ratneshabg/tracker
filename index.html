@@ -764,16 +764,20 @@
         </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 class="font-semibold text-sm text-gray-700 mb-5">Items per Owner</h2>
-          <canvas id="rptOwnerChart" height="210"></canvas>
-        </div>
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 class="font-semibold text-sm text-gray-700 mb-5">Status Distribution</h2>
-          <canvas id="rptStatusChart" height="210"></canvas>
-        </div>
-      </div>
+     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+    <h2 class="font-semibold text-sm text-gray-700 mb-5">Items per Owner</h2>
+    <div class="relative h-[300px] w-full">
+      <canvas id="rptOwnerChart"></canvas>
+    </div>
+  </div>
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+    <h2 class="font-semibold text-sm text-gray-700 mb-5">Status Distribution</h2>
+    <div class="relative h-[300px] w-full">
+      <canvas id="rptStatusChart"></canvas>
+    </div>
+  </div>
+</div>
 
       <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
         <h2 class="font-semibold text-sm text-gray-700 mb-5">Owner Performance Table</h2>
