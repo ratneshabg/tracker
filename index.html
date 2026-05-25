@@ -423,10 +423,8 @@
 </head>
 <body class="bg-gray-50 font-sans text-gray-800">
 
-<!-- Mobile Menu Button -->
 <button id="mobileMenuBtn" onclick="toggleMobileMenu()">☰</button>
 
-<!-- Mobile Overlay -->
 <div id="mobileOverlay" onclick="toggleMobileMenu()"></div>
 
 <div id="loginScreen">
@@ -476,7 +474,6 @@
 
 <div id="appWrapper" class="flex min-h-screen">
 
-  <!-- Mobile Menu -->
   <div id="mobileMenu" class="text-white p-5">
     <div class="flex justify-between items-center mb-6">
       <h1 class="sidebar-title text-xl font-bold tracking-tight leading-tight">Meeting Actions</h1>
@@ -507,7 +504,6 @@
     </button>
   </div>
 
-  <!-- Desktop Sidebar -->
   <aside class="w-64 bg-gradient-to-b from-slate-950 to-blue-950 text-white p-5 hidden md:flex flex-col flex-shrink-0 shadow-2xl">
     <h1 class="sidebar-title text-xl font-bold mb-8 tracking-tight leading-tight">Meeting Actions</h1>
 
@@ -618,7 +614,6 @@
         </div>
       </div>
 
-      <!-- Sync progress bar -->
       <div id="syncProgressWrap" class="hidden mb-4 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <div class="flex justify-between text-xs font-medium text-gray-600 mb-2">
           <span id="syncProgressLabel">Syncing…</span>
@@ -803,7 +798,6 @@
       <h1 class="text-2xl md:text-3xl font-bold mb-2 text-gray-900">Meeting Documents</h1>
       <p class="text-gray-500 text-sm mb-8">Access all Minutes of Meetings (MOMs) and related documents</p>
 
-      <!-- Main MOM Access Card -->
       <div class="mom-access-card mb-8">
         <span class="mom-icon">📋</span>
         <h2>Meeting Minutes Archive</h2>
@@ -818,7 +812,6 @@
         </a>
       </div>
 
-      <!-- Info Cards -->
       <div class="info-cards">
         <div class="info-card">
           <span class="info-card-icon">📄</span>
@@ -1442,11 +1435,41 @@ function handleEditStatusChange(status) {
   }
 }
 
-
 async function saveEditItem() {
-  async function saveEditItem() {  // <── Duplicate nested declaration!
   if (_editIndex === null) return;
-  ...
+  
+  const item = items[_editIndex];
+  item.meetingDate = document.getElementById('em-meetingDate').value;
+  item.title = document.getElementById('em-title').value;
+  item.owner = document.getElementById('em-owner').value;
+  item.status = document.getElementById('em-status').value;
+  item.dueDate = document.getElementById('em-dueDate').value;
+  item.progress = parseInt(document.getElementById('em-progress').value) || 0;
+  item.notes = document.getElementById('em-notes').value;
+  
+  syncProgressStatus(item);
+  
+  try {
+    // We match via the unique combination of the action title to update the correct row
+    const response = await fetch(`${SHEETDB_URL}/title/${encodeURIComponent(item.title)}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: item })
+    });
+    
+    if (response.ok) {
+      showToast('Item updated in spreadsheet ✓');
+    } else {
+      throw new Error('SheetDB write error');
+    }
+  } catch (error) {
+    console.error('Update error:', error);
+    showToast('⚠ Update failed (Saved locally only)');
+  }
+  
+  closeEditModal();
+  renderAll();
+}
 
 async function deleteItem(idx) {
   if (!confirm('Delete this action item?')) return;
