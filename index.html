@@ -1443,6 +1443,7 @@ function handleEditStatusChange(status) {
 }
 
 async function saveEditItem() {
+  async function saveEditItem() {
   if (_editIndex === null) return;
   
   const item = items[_editIndex];
@@ -1457,15 +1458,21 @@ async function saveEditItem() {
   syncProgressStatus(item);
   
   try {
-    await fetch(SHEETDB_URL + '/id/' + _editIndex, {
+    // We match via the unique combination of the action title to update the correct row
+    const response = await fetch(`${SHEETDB_URL}/title/${encodeURIComponent(item.title)}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ data: item })
     });
-    showToast('Item updated ✓');
+    
+    if (response.ok) {
+      showToast('Item updated in spreadsheet ✓');
+    } else {
+      throw new Error('SheetDB write error');
+    }
   } catch (error) {
     console.error('Update error:', error);
-    showToast('⚠ Update failed (offline mode)');
+    showToast('⚠ Update failed (Saved locally only)');
   }
   
   closeEditModal();
@@ -1475,14 +1482,23 @@ async function saveEditItem() {
 async function deleteItem(idx) {
   if (!confirm('Delete this action item?')) return;
   
+  const item = items[idx];
+  
   try {
-    await fetch(SHEETDB_URL + '/id/' + idx, { method: 'DELETE' });
-    items.splice(idx, 1);
-    showToast('Item deleted ✓');
+    const response = await fetch(`${SHEETDB_URL}/title/${encodeURIComponent(item.title)}`, { 
+      method: 'DELETE' 
+    });
+    
+    if (response.ok) {
+      items.splice(idx, 1);
+      showToast('Item deleted from spreadsheet ✓');
+    } else {
+      throw new Error('SheetDB delete error');
+    }
   } catch (error) {
     console.error('Delete error:', error);
     items.splice(idx, 1);
-    showToast('⚠ Item deleted (offline mode)');
+    showToast('⚠ Item deleted locally (Sync failed)');
   }
   
   renderAll();
