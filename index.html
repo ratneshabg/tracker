@@ -216,6 +216,17 @@
     ::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:8px; }
     ::-webkit-scrollbar-thumb:hover { background:#94a3b8; }
 
+    /* ── Column Resizer ── */
+    .resizable-th { position:relative; overflow:visible; }
+    .col-resizer {
+      position:absolute; right:0; top:0; height:100%; width:7px;
+      cursor:col-resize; user-select:none; background:transparent;
+      z-index:10; border-right:2px solid transparent; transition:border-color .15s;
+    }
+    .col-resizer:hover, .col-resizer.dragging {
+      border-right:2px solid #2563eb; background:rgba(37,99,235,.09);
+    }
+
     /* ── Details arrow ── */
     details summary { list-style:none; }
     details summary::-webkit-details-marker { display:none; }
@@ -640,20 +651,31 @@
         <button onclick="clearFilters()" class="text-sm text-blue-600 hover:underline font-medium">Clear Filters</button>
       </div>
 
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-auto">
-        <table class="w-full text-sm">
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-x-auto">
+        <table id="actionItemsTable" class="text-sm" style="table-layout:fixed; width:100%; min-width:1200px;">
+          <colgroup>
+            <col id="col-date"    style="width:130px; min-width:90px;">
+            <col id="col-title"   style="width:280px; min-width:100px;">
+            <col id="col-owner"   style="width:140px; min-width:80px;">
+            <col id="col-status"  style="width:120px; min-width:90px;">
+            <col id="col-due"     style="width:120px; min-width:90px;">
+            <col id="col-prog"    style="width:90px;  min-width:70px;">
+            <col id="col-notes"   style="width:220px; min-width:100px;">
+            <col id="col-update"  style="width:220px; min-width:100px;">
+            <col id="col-actions" style="width:110px; min-width:90px;">
+          </colgroup>
           <thead>
             <tr class="border-b bg-gray-50 text-gray-600 text-left text-xs uppercase tracking-wide font-semibold">
-  <th class="p-3 md:p-4 w-[120px] cursor-pointer hover:text-gray-900 whitespace-nowrap" onclick="sortBy('meetingDate')">Date <span id="sort-meetingDate"></span></th>
-  <th class="p-3 md:p-4 w-[300px] cursor-pointer hover:text-gray-900" onclick="sortBy('title')">Action Item <span id="sort-title"></span></th>
-  <th class="p-3 md:p-4 w-[150px] cursor-pointer hover:text-gray-900" onclick="sortBy('owner')">Owner <span id="sort-owner"></span></th>
-  <th class="p-3 md:p-4 w-[120px]">Status</th>
-  <th class="p-3 md:p-4 w-[120px] cursor-pointer hover:text-gray-900 whitespace-nowrap" onclick="sortBy('dueDate')">Due Date <span id="sort-dueDate"></span></th>
-  <th class="p-3 md:p-4 w-[100px]">Progress</th>
-  <th class="p-3 md:p-4 w-[250px] hidden md:table-cell">Notes</th>
-  <th class="p-3 md:p-4 w-[250px] hidden md:table-cell" style="background:#fefce8;">This Week's Update</th>
-  <th class="p-3 md:p-4 w-[120px]">Actions</th>
-</tr>
+              <th class="p-3 md:p-4 cursor-pointer hover:text-gray-900 whitespace-nowrap select-none resizable-th" onclick="sortBy('meetingDate')" data-col="col-date">Date <span id="sort-meetingDate"></span><span class="col-resizer"></span></th>
+              <th class="p-3 md:p-4 cursor-pointer hover:text-gray-900 select-none resizable-th" onclick="sortBy('title')" data-col="col-title">Action Item <span id="sort-title"></span><span class="col-resizer"></span></th>
+              <th class="p-3 md:p-4 cursor-pointer hover:text-gray-900 select-none resizable-th" onclick="sortBy('owner')" data-col="col-owner">Owner <span id="sort-owner"></span><span class="col-resizer"></span></th>
+              <th class="p-3 md:p-4 select-none resizable-th" data-col="col-status">Status<span class="col-resizer"></span></th>
+              <th class="p-3 md:p-4 cursor-pointer hover:text-gray-900 whitespace-nowrap select-none resizable-th" onclick="sortBy('dueDate')" data-col="col-due">Due Date <span id="sort-dueDate"></span><span class="col-resizer"></span></th>
+              <th class="p-3 md:p-4 select-none resizable-th" data-col="col-prog">Progress<span class="col-resizer"></span></th>
+              <th class="p-3 md:p-4 select-none resizable-th" data-col="col-notes">Notes<span class="col-resizer"></span></th>
+              <th class="p-3 md:p-4 select-none resizable-th" data-col="col-update" style="background:#fefce8; color:#92400e;">🗓 This Week's Update<span class="col-resizer"></span></th>
+              <th class="p-3 md:p-4 select-none" data-col="col-actions">Actions</th>
+            </tr>
           </thead>
           <tbody id="allItemsBody"></tbody>
         </table>
@@ -701,7 +723,7 @@
             <input id="f-notes" type="text" placeholder="Optional context or link…" class="border border-gray-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-blue-400 outline-none">
           </div>
           <div class="flex flex-col gap-2 md:col-span-2">
-            <label class="text-xs font-semibold uppercase tracking-wide" style="color:#b45309;">🗓 This Week's Update</label>
+            <label class="text-xs font-semibold uppercase tracking-wide" style="color:#92400e;">🗓 This Week's Update</label>
             <textarea id="f-weeklyUpdate" rows="3" placeholder="What has been done this week on this action item?" class="border border-amber-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-amber-300 outline-none" style="background:#fefce8; resize:vertical;"></textarea>
           </div>
         </div>
@@ -1027,7 +1049,7 @@
         <input id="em-notes" type="text" class="border border-gray-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-blue-300">
       </div>
       <div class="flex flex-col gap-2 md:col-span-2">
-        <label class="text-xs text-gray-600 font-semibold uppercase tracking-wide" style="color:#b45309;">🗓 This Week's Update</label>
+        <label class="text-xs font-semibold uppercase tracking-wide" style="color:#92400e;">🗓 This Week's Update</label>
         <textarea id="em-weeklyUpdate" rows="3" placeholder="What has been done this week on this action item?" class="border border-amber-200 rounded-xl p-3 text-sm outline-none focus:ring-2 focus:ring-amber-300" style="background:#fefce8; resize:vertical;"></textarea>
       </div>
     </div>
@@ -1366,17 +1388,17 @@ function renderAllItems() {
                         item.status === 'In Progress' ? 'bg-yellow-100 text-yellow-700' :
                         'bg-gray-100 text-gray-700';
    return `
-      <tr class="border-b hover:bg-gray-50 table-fixed w-full">
-        <td class="p-3 md:p-4 text-xs md:text-sm whitespace-nowrap overflow-hidden">${formatDate(item.meetingDate)}</td>
-        <td class="p-3 md:p-4 text-xs md:text-sm break-words whitespace-normal">${item.title}</td>
-        <td class="p-3 md:p-4 text-xs md:text-sm break-words whitespace-normal">${item.owner}</td>
+      <tr class="border-b hover:bg-gray-50">
+        <td class="p-3 md:p-4 text-xs md:text-sm" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${formatDate(item.meetingDate)}</td>
+        <td class="p-3 md:p-4 text-xs md:text-sm" style="white-space:normal; word-break:break-word;">${item.title}</td>
+        <td class="p-3 md:p-4 text-xs md:text-sm" style="white-space:normal; word-break:break-word;">${item.owner}</td>
         <td class="p-3 md:p-4">
           <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColor}">${item.status}</span>
         </td>
-        <td class="p-3 md:p-4 text-xs md:text-sm whitespace-nowrap overflow-hidden">${formatDate(item.dueDate)}</td>
+        <td class="p-3 md:p-4 text-xs md:text-sm" style="white-space:nowrap;">${formatDate(item.dueDate)}</td>
         <td class="p-3 md:p-4 text-xs md:text-sm">${item.progress}%</td>
-        <td class="p-3 md:p-4 text-xs md:text-sm hidden md:table-cell break-words whitespace-normal">${item.notes || '—'}</td>
-        <td class="p-3 md:p-4 text-xs md:text-sm hidden md:table-cell break-words whitespace-normal" style="background:#fefce8;">${item.weeklyUpdate || '—'}</td>
+        <td class="p-3 md:p-4 text-xs md:text-sm" style="white-space:normal; word-break:break-word;">${item.notes || '—'}</td>
+        <td class="p-3 md:p-4 text-xs md:text-sm" style="background:#fefce8; white-space:normal; word-break:break-word;">${item.weeklyUpdate || '—'}</td>
         <td class="p-3 md:p-4">
           <div class="flex gap-2">
             <button onclick="editItem(${items.indexOf(item)})" class="text-blue-600 hover:text-blue-800 text-xs font-medium">Edit</button>
@@ -1945,9 +1967,37 @@ function doLogout() {
   showToast('Signed out ✓');
 }
 
+// ── COLUMN RESIZER ────────────────────────────────────────────────
+function initColResizers() {
+  document.querySelectorAll('.col-resizer').forEach(resizer => {
+    let startX, startW, col;
+    resizer.addEventListener('mousedown', function(e) {
+      e.preventDefault(); e.stopPropagation();
+      const th = this.closest('th');
+      col = document.getElementById(th.dataset.col);
+      startX = e.clientX;
+      startW = col ? col.offsetWidth : th.offsetWidth;
+      this.classList.add('dragging');
+      function onMove(e) {
+        const newW = Math.max(70, startW + (e.clientX - startX));
+        if (col) col.style.width = newW + 'px';
+      }
+      function onUp() {
+        resizer.classList.remove('dragging');
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+    resizer.addEventListener('click', e => e.stopPropagation());
+  });
+}
+
 // ── Initialize ────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded', () => {
   loadSettings();
+  initColResizers();
 });
 </script>
 </body>
