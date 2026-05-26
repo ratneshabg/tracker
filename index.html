@@ -1083,7 +1083,10 @@ async function loadData() {
     const response = await fetch(SHEETDB_URL);
     if (response.ok) {
       items = await response.json();
-      items.forEach(i => i.progress = parseInt(i.progress) || 0);
+      items.forEach(i => {
+        i.progress = parseInt(i.progress) || 0;
+        i.weeklyUpdate = i.weeklyUpdate || '';
+      });
       console.log('✓ Data loaded from SheetDB:', items.length, 'items');
       renderAll();
     } else {
@@ -1109,7 +1112,8 @@ function getSampleData() {
       status: 'Completed',
       dueDate: '2025-05-20',
       progress: 100,
-      notes: 'Dashboard deployed and verified'
+      notes: 'Dashboard deployed and verified',
+      weeklyUpdate: 'Final sign-off received from all stakeholders'
     },
     {
       meetingDate: '2025-05-15',
@@ -1118,7 +1122,8 @@ function getSampleData() {
       status: 'In Progress',
       dueDate: '2025-05-28',
       progress: 65,
-      notes: 'Data collection phase complete'
+      notes: 'Data collection phase complete',
+      weeklyUpdate: 'Draft report reviewed; awaiting finance figures'
     },
     {
       meetingDate: '2025-05-18',
@@ -1127,7 +1132,8 @@ function getSampleData() {
       status: 'Not Started',
       dueDate: '2025-06-05',
       progress: 0,
-      notes: 'Pending venue confirmation'
+      notes: 'Pending venue confirmation',
+      weeklyUpdate: ''
     }
   ];
 }
